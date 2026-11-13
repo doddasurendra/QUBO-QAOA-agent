@@ -18,7 +18,7 @@ has been made.
 | Ising | QUBO→Ising, Ising→QUBO, spin/bit maps, Qiskit-ordered Pauli terms | exhaustive equivalence, errors ≤ 2e-14 (`docs/SCIENTIFIC_VALIDATION.md` §1) |
 | Validation framework | exhaustive: feasible energy = objective, penalty dominance, argmin feasibility, Ising equivalence | all 6 industry examples pass (§2) |
 | Classical solvers | exhaustive, MILP (HiGHS, sign-aware Fortet), simulated annealing (vectorised), tabu, greedy | `tests/test_solvers.py`; 10/10 optimal vs exhaustive (§3) |
-| QAOA | statevector simulator, X and ring-XY mixers, custom `Mixer` interface, adjoint gradients, COBYLA/Nelder-Mead/Powell/L-BFGS-B/BFGS/SLSQP/SPSA/Adam, linear-ramp/random/INTERP init, restarts, history, sampling, feasibility ranking, approximation ratio, P(ground) | fidelity 1.0 vs Qiskit (§4); 8-ring MaxCut p=1 = 6.000000 vs theory 6 (§5); `tests/test_qaoa.py` (24) |
+| QAOA | statevector simulator, X and ring-XY mixers, custom `Mixer` interface, adjoint gradients, COBYLA/Nelder-Mead/Powell/L-BFGS-B/BFGS/SLSQP/SPSA/Adam, linear-ramp/random/INTERP init, restarts, history, sampling, feasibility ranking, approximation ratio, P(ground) | fidelity 1.0 vs Qiskit (§4); 8-ring MaxCut p=1 = 6.000000 vs theory 6 (§5); `tests/test_qaoa.py` (23) |
 | Circuits | Qiskit circuit, gate list for UI, OpenQASM 3, text diagram; Aer bit-order verified | `tests/test_qaoa.py` |
 | Providers | Aer (ideal + synthetic noise), IBM Runtime (SamplerV2), Amazon Braket (native circuit; IonQ/Rigetti/IQM via ARNs), D-Wave annealer (labelled `qpu_annealer`); honest status; approval enforced | mocked IBM backend refused without approval; missing SDK/creds → explicit errors |
 | Hybrid engine | transparent recommendations with reasons, execution, ranking vs proven/best optimum, no-advantage note | `tests/test_industries_hybrid.py` |
@@ -32,7 +32,7 @@ has been made.
 
 ## Tests
 
-- **Passed:** backend `pytest` **111 / 111** (core 33, solvers 13, QAOA 24, industries/hybrid 14, agents 11,
+- **Passed:** backend `pytest` **111 / 111** (core 33, solvers 13, QAOA 23, industries/hybrid 15, agents 11,
   API 16); live HTTP smoke test against a running server **27 / 27**; frontend `tsc` + `vite build` clean.
 - **Failed:** none outstanding. During development the tests caught and I fixed: IBM provider importing
   its SDK before the availability check; a delegation permission check that ran after the sub-agent; the
