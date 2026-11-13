@@ -13,6 +13,7 @@ from .logistics_ext import CargoLoading, DockScheduling, VehicleRouting
 from .manufacturing import MachineScheduling
 from .manufacturing_ext import JobShopScheduling
 from .supply_chain import FacilityLocation, ProductionPlanning, SupplierSelection
+from .supply_chain_echelon import EchelonNetworkDesign, MultiEchelonReplenishment
 from .telecom import BaseStationAssignment
 from .telecom_ext import NetworkRouting, SpectrumAllocation
 
@@ -30,7 +31,7 @@ PROBLEMS: Dict[str, IndustryProblem] = {p.key: p for p in (
     # manufacturing
     MachineScheduling(), JobShopScheduling(), ProductionPlanning(),
     # supply chain
-    FacilityLocation(), SupplierSelection(),
+    FacilityLocation(), SupplierSelection(), EchelonNetworkDesign(), MultiEchelonReplenishment(),
 )}
 
 

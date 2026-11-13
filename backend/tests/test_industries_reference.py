@@ -257,6 +257,36 @@ def test_supplier_selection_reference():
     assert out["suppliers_per_region"].get("CN", 0) <= 1
 
 
+def test_two_echelon_network_reference():
+    from qopt.industries.supply_chain_echelon import echelon_network_cost
+    p, d, ev, out = qubo_optimum("supply_chain.two_echelon_network")
+    costs = [echelon_network_cost(d, list(ch)) for ch in itertools.product(d.paths(), repeat=len(d.customers))]
+    assert ev.objective == pytest.approx(min(c for c in costs if c is not None)) == pytest.approx(out["total_cost"])
+    assert all(len(v) == 1 for v in out["dc_supplier"].values())     # single-sourced DCs
+
+
+def test_multi_echelon_replenishment_reference():
+    from qopt.industries.supply_chain_echelon import replenishment_cost
+    p, d, ev, out = qubo_optimum("supply_chain.multi_echelon_replenishment")
+    J, S, T = len(d.dcs), len(d.stores), len(d.periods)
+    best = INF
+    for flat in itertools.product(range(d.max_trucks + 1), repeat=(J + S) * T):
+        n_dc = [list(flat[j * T:(j + 1) * T]) for j in range(J)]
+        n_st = [list(flat[(J + s) * T:(J + s + 1) * T]) for s in range(S)]
+        c = replenishment_cost(d, n_dc, n_st)
+        if c is not None:
+            best = min(best, c)
+    assert ev.objective == pytest.approx(best) == pytest.approx(out["total_cost"])
+
+
+def test_multi_echelon_rejects_dc_level_infeasibility():
+    p = get_problem("supply_chain.multi_echelon_replenishment")
+    bad = p.example()
+    bad["initial_inventory_dc"] = [2, 1]        # DC-North cannot feed two full store trucks in week 1
+    with pytest.raises(Exception, match="truckloads"):
+        p.parse(bad)
+
+
 # ------------------------------------------------------------------ manufacturing
 def test_job_shop_reference():
     from qopt.industries.manufacturing_ext import schedule_ok
