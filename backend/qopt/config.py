@@ -3,11 +3,14 @@ from __future__ import annotations
 import logging
 import secrets
 from functools import lru_cache
+from pathlib import Path
 from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 log = logging.getLogger("qopt")
+# <repo>/backend/qopt/config.py → <repo>; only meaningful for a source checkout
+_REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Settings(BaseSettings):
@@ -29,12 +32,26 @@ class Settings(BaseSettings):
     agent_daily_budget_usd: float = 10.0
     agent_run_budget_usd: float = 2.0
     redis_url: str = ""                         # optional; not required for single-node deployments
+    # Locations of the built SPA and the markdown docs. Empty → the source-checkout defaults
+    # (<repo>/frontend/dist, <repo>/docs). Set explicitly for installed deployments (the Docker image does).
+    frontend_dist: str = ""
+    docs_dir: str = ""
+
+    def frontend_dist_path(self) -> Path:
+        return Path(self.frontend_dist) if self.frontend_dist else _REPO_ROOT / "frontend" / "dist"
+
+    def docs_path(self) -> Path:
+        return Path(self.docs_dir) if self.docs_dir else _REPO_ROOT / "docs"
 
     def effective_jwt_secret(self) -> str:
+        if self.environment == "production":
+            if not self.jwt_secret:
+                raise RuntimeError("QOPT_JWT_SECRET must be set in production")
+            if len(self.jwt_secret) < 32 or " " in self.jwt_secret:
+                raise RuntimeError("QOPT_JWT_SECRET is too weak: use ≥ 32 random characters, e.g. "
+                                   "python -c \"import secrets;print(secrets.token_urlsafe(48))\"")
         if self.jwt_secret:
             return self.jwt_secret
-        if self.environment == "production":
-            raise RuntimeError("QOPT_JWT_SECRET must be set in production")
         if not hasattr(self, "_dev_secret"):
             object.__setattr__(self, "_dev_secret", secrets.token_urlsafe(48))
             log.warning("QOPT_JWT_SECRET not set: using an ephemeral development secret "

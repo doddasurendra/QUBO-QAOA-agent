@@ -3,25 +3,51 @@
 ## Single container + PostgreSQL (recommended)
 
 ```bash
-cp .env.example .env        # set POSTGRES_PASSWORD, QOPT_JWT_SECRET, optionally ANTHROPIC_API_KEY / provider creds
+cp .env.example .env        # REQUIRED: POSTGRES_PASSWORD and QOPT_JWT_SECRET (≥ 32 random chars)
+                            # optional: ANTHROPIC_API_KEY, provider credentials
 docker compose up -d --build
-open http://localhost:8000  # first visit creates the administrator
+curl http://localhost:8000/api/health      # → {"status":"ok",...}
+open http://localhost:8000                 # first visit creates the administrator
 ```
 
-The image builds the SPA, installs the backend, runs Alembic migrations at startup and serves API + UI
-on port 8000 as a non-root user. Provider SDKs are opt-in: build with `--build-arg EXTRAS="[ibm,braket,dwave]"`.
+The image builds the SPA, installs the backend **as a regular package**, runs Alembic migrations at startup
+(they ship inside the package, `qopt/migrations`) and serves API + UI on port 8000 as a non-root user, from
+`/app` (outside any source tree). Provider SDKs are opt-in: build with `--build-arg EXTRAS="[ibm,braket,dwave]"`.
+Production mode refuses to start without a strong `QOPT_JWT_SECRET`.
 
-> Not verified in this environment: Docker is not installed on the development machine used to build this
-> release, so the image and compose file have not been built or run here. CI (`.github/workflows/ci.yml`)
-> builds the image.
+### What has and has not been verified
+
+- **Verified:** the exact runtime the image uses. A non-editable install of the package, started with
+  uvicorn from outside the source tree in production mode, with `QOPT_FRONTEND_DIST` / `QOPT_DOCS_DIR` set as in the
+  Dockerfile, passed 12/12 live HTTP checks (health, OpenAPI, SPA + assets, migrations, login, docs, all
+  industry modules, a background job, secret not leaked). `tests/test_deployment.py` guards the packaging,
+  migration, path and `.env.example` requirements in CI.
+- **Not verified here:** `docker build` / `docker compose up` themselves, and PostgreSQL. Docker, WSL2 and
+  PostgreSQL are not installed on the development machine (installing Docker Desktop requires enabling
+  WSL2/Hyper-V with admin rights and a reboot). CI (`.github/workflows/ci.yml`) builds the image. On a Docker
+  host, run the commands above; then check `docker compose ps` shows the app as `healthy`.
+
+### Without Docker (single host)
+
+```bash
+python -m venv .venv && .venv/bin/pip install ./backend "psycopg[binary]" pypdf
+(cd frontend && npm ci && npm run build)
+export QOPT_ENVIRONMENT=production QOPT_JWT_SECRET=... QOPT_DATABASE_URL=postgresql+psycopg://...
+export QOPT_FRONTEND_DIST=$PWD/frontend/dist QOPT_DOCS_DIR=$PWD/docs
+.venv/bin/uvicorn qopt.api.app:app --host 0.0.0.0 --port 8000
+```
 
 ## Configuration (environment variables)
 
 | variable | default | notes |
 |---|---|---|
-| `QOPT_ENVIRONMENT` | development | `production` refuses to start without `QOPT_JWT_SECRET` |
+| `QOPT_ENVIRONMENT` | development | `production` refuses to start without a strong `QOPT_JWT_SECRET` |
 | `QOPT_DATABASE_URL` | `sqlite:///./data/qopt.db` | `postgresql+psycopg://user:pw@host/db` in production |
-| `QOPT_JWT_SECRET` | ephemeral (dev) | ≥ 32 random bytes |
+| `QOPT_JWT_SECRET` | ephemeral (dev) | ≥ 32 random characters, no spaces (enforced in production) |
+| `QOPT_FRONTEND_DIST` | `<repo>/frontend/dist` | built SPA; the image sets `/app/frontend/dist`. API-only if missing (logged) |
+| `QOPT_DOCS_DIR` | `<repo>/docs` | markdown docs served in the UI; the image sets `/app/docs` |
+| `QOPT_AGENT_RATE_LIMIT_PER_MINUTE` | 10 | agent runs per user |
+| `QOPT_MAX_UPLOAD_BYTES` | 5242880 | dataset / research uploads |
 | `QOPT_JWT_EXPIRY_MINUTES` | 120 | |
 | `QOPT_ALLOW_REGISTRATION` | false | self-service researcher accounts |
 | `QOPT_CORS_ORIGINS` | localhost:5173 | JSON list |

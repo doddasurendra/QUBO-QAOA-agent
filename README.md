@@ -9,7 +9,9 @@ honestly, and drive the workflow with specialised Claude agents.
 - **Classical**: exhaustive, MILP (HiGHS), simulated annealing, tabu, greedy
 - **Providers**: Qiskit Aer, IBM Quantum, Amazon Braket, D-Wave (annealer) — every result labelled simulator vs real QPU
 - **Agents**: 10 Claude roles with tool permissions, budgets and approval-gated hardware access
-- **Industries**: finance, healthcare, telecom, energy, logistics, manufacturing
+- **Industries**: 27 modules across finance, healthcare, telecom, energy, logistics, manufacturing and
+  supply chain (including multi-echelon network design and replenishment), each validated exhaustively and
+  against an independent brute-force solver
 - **Platform**: FastAPI, SQLAlchemy/Alembic, RBAC, audit log, React dashboard (24 pages)
 
 ## Quick start (development)
@@ -23,7 +25,19 @@ cd ..\backend; ..\.venv\Scripts\uvicorn qopt.api.app:app --port 8000
 # open http://localhost:8000 — the first visit creates the admin account
 ```
 
-Docker: `cp .env.example .env && docker compose up -d --build` (see `docs/DEPLOYMENT.md`).
+## Deploy (Docker + PostgreSQL)
+
+```bash
+cp .env.example .env          # set POSTGRES_PASSWORD and QOPT_JWT_SECRET (≥ 32 random characters)
+docker compose up -d --build
+curl http://localhost:8000/api/health
+```
+
+The image installs the backend as a regular package (migrations included), serves the API and UI on
+port 8000 as a non-root user, and refuses to start in production without a strong JWT secret. Hardware
+SDKs are opt-in via `--build-arg EXTRAS="[ibm,braket,dwave]"`. Details, all settings and a no-Docker
+recipe are in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md). The installed runtime has been verified live; the
+Docker build itself has not been run on the development machine (see PROJECT_STATUS.md).
 
 ## Documentation
 

@@ -101,7 +101,10 @@ def create_app() -> FastAPI:
         return {"status": "ok", "version": __version__}
 
     # Serve the built frontend if present (single-container deployment)
-    dist = Path(__file__).resolve().parents[3] / "frontend" / "dist"
+    dist = s.frontend_dist_path().resolve()
+    if not (dist / "index.html").is_file():
+        logging.getLogger("qopt").warning("frontend build not found at %s: serving the API only "
+                                          "(set QOPT_FRONTEND_DIST)", dist)
     if (dist / "index.html").is_file() and (dist / "assets").is_dir():
         app.mount("/assets", StaticFiles(directory=dist / "assets"), name="assets")
 

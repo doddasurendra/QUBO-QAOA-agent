@@ -10,17 +10,26 @@ RUN npm run build
 FROM python:3.12-slim AS app
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
 RUN useradd --create-home --uid 10001 qopt
-WORKDIR /app/backend
+
+# Install the package (migrations are package data inside qopt/migrations).
+WORKDIR /build
 COPY backend/pyproject.toml ./
 COPY backend/qopt ./qopt
-COPY backend/alembic ./alembic
-COPY backend/alembic.ini ./
 ARG EXTRAS=""
-RUN pip install --upgrade pip && pip install ".${EXTRAS}" "psycopg[binary]>=3.1" && pip install pypdf
+RUN pip install --upgrade pip \
+ && pip install ".${EXTRAS}" "psycopg[binary]>=3.1" pypdf \
+ && rm -rf /build
+
+# Runtime layout: run from /app so the *installed* package is imported (not a source copy).
+WORKDIR /app
 COPY docs /app/docs
 COPY --from=web /web/dist /app/frontend/dist
-RUN mkdir -p /app/backend/data && chown -R qopt /app
+ENV QOPT_FRONTEND_DIST=/app/frontend/dist \
+    QOPT_DOCS_DIR=/app/docs \
+    QOPT_DATABASE_URL=sqlite:////app/data/qopt.db
+RUN mkdir -p /app/data && chown -R qopt /app
 USER qopt
 EXPOSE 8000
-HEALTHCHECK --interval=30s --timeout=5s CMD python -c "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/api/health')"
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
+  CMD python -c "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/api/health')"
 CMD ["uvicorn", "qopt.api.app:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--workers", "1"]

@@ -9,13 +9,13 @@ backend/
   qopt/quantum     statevector QAOA (adjoint gradients), mixers, Qiskit circuits, bit-order helpers
   qopt/providers   Aer, IBM Runtime, Amazon Braket, D-Wave (annealer) + registry
   qopt/hybrid      solver recommendation + hybrid execution + ranking
-  qopt/industries  25 industry templates (schema, formulation, interpretation, sample data);
-                   *_ext.py, energy_flex.py and supply_chain.py hold the later modules
+  qopt/industries  27 industry templates (schema, formulation, interpretation, sample data);
+                   *_ext.py, energy_flex.py, supply_chain*.py hold the later modules
   qopt/agents      Claude tool-use orchestrator, 10 agent roles, tool registry
   qopt/services    jobs, audit, security, research search, reports, agent persistence bridge
   qopt/api         FastAPI app and routers
   qopt/db          SQLAlchemy models, session, migrations entry point
-  alembic/         migrations
+  qopt/migrations  Alembic migrations (package data: shipped with every install)
   tests/           pytest suite
   scripts/         report generators
 frontend/          Vite + React + TypeScript + Tailwind SPA (24 pages)
@@ -55,7 +55,11 @@ QAOA unitary equality with Qiskit, adjoint gradient = finite differences.
 - **Agent tool**: add a `Tool` in `agents/tools.py` (real platform code only) and grant it to agents in
   `agents/definitions.py`. Sensitive actions must be `requires_approval=True` and create approval requests.
 - **Migration**: edit `db/models.py`, then
-  `alembic -c alembic.ini revision --autogenerate -m "..."` (set `QOPT_DATABASE_URL` to a scratch DB).
+  `alembic -c alembic.ini revision --autogenerate -m "..."` from `backend/` (set `QOPT_DATABASE_URL` to a
+  scratch DB). Revisions land in `qopt/migrations/versions/` and are packaged automatically.
+- **Never locate files with `Path(__file__).parents[...]` outside the package**: installed deployments have no
+  source tree. Ship data as package data, or make the location a setting (see `QOPT_FRONTEND_DIST`,
+  `QOPT_DOCS_DIR`). `tests/test_deployment.py` enforces the current guarantees.
 
 ## Agents and the Anthropic API
 

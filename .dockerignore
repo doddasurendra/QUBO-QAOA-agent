@@ -1,0 +1,15 @@
+# Keep the build context small and platform-neutral.
+.git
+.venv
+**/__pycache__
+**/*.pyc
+**/node_modules
+frontend/dist
+backend/build
+backend/*.egg-info
+backend/data
+**/*.db
+**/*.sqlite3
+.env
+.claude
+.pytest_cache

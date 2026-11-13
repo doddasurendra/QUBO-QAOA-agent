@@ -34,6 +34,10 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools.packages.find]
 include = ["qopt*"]
 
+# Alembic migrations ship inside the package so installed deployments (Docker) can migrate at startup.
+[tool.setuptools.package-data]
+qopt = ["migrations/*.py", "migrations/*.mako", "migrations/versions/*.py"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]

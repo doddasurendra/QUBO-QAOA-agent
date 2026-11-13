@@ -22,7 +22,8 @@ from .deps import admin, researcher, viewer
 from .routes_data import job_out
 
 router = APIRouter()
-DOCS_DIR = Path(__file__).resolve().parents[3] / "docs"
+def docs_dir() -> Path:
+    return get_settings().docs_path()
 
 
 # ------------------------------------------------------------------ agents
@@ -220,17 +221,18 @@ def overview(user: User = Depends(viewer), db: Session = Depends(get_db)):
 # ------------------------------------------------------------------ documentation
 @router.get("/docs-content")
 def docs_list(_: User = Depends(viewer)):
-    if not DOCS_DIR.exists():
+    d = docs_dir()
+    if not d.is_dir():
         return []
     return [{"slug": p.stem, "title": (p.read_text(encoding="utf-8").splitlines() or [p.stem])[0].lstrip("# ")}
-            for p in sorted(DOCS_DIR.glob("*.md"))]
+            for p in sorted(d.glob("*.md"))]
 
 
 @router.get("/docs-content/{slug}")
 def docs_get(slug: str, _: User = Depends(viewer)):
     if not slug.replace("_", "").replace("-", "").isalnum():
         raise HTTPException(400, "invalid slug")
-    p = DOCS_DIR / f"{slug}.md"
+    p = docs_dir() / f"{slug}.md"
     if not p.is_file():
         raise HTTPException(404, "not found")
     return {"slug": slug, "markdown": p.read_text(encoding="utf-8")}
