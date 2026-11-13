@@ -227,6 +227,31 @@ def test_spec_roundtrip():
     assert r1.passed and r2.passed and r1.best_feasible == r2.best_feasible
 
 
+def test_vectorised_slack_completion_matches_per_row():
+    from qopt.core.validation import _vectorised_slack_completion
+    rng = np.random.default_rng(5)
+    m = Model()
+    xs = m.binaries([f"x{i}" for i in range(7)])
+    m.minimize(quicksum(float(rng.normal()) * x for x in xs))
+    m.add_constraint(quicksum(int(w) * x for w, x in zip(rng.integers(1, 6, 7), xs)) <= 9, "a")
+    m.add_constraint(quicksum(int(w) * x for w, x in zip(rng.integers(1, 4, 7), xs)) >= 4, "b")
+    m.add_constraint(0.5 * xs[0] + 0.75 * xs[1] + 0.25 * xs[2] <= 1.0, "c", resolution=0.25)
+    cm = m.compile()
+    D = all_assignments(7)
+    names = cm.decision_variables
+
+    def ev(e):
+        idx = {v: i for i, v in enumerate(names)}
+        val = np.full(len(D), e.const)
+        for v, c in e.lin.items():
+            val += c * D[:, idx[v]]
+        return val
+
+    bulk = _vectorised_slack_completion(cm, D, ev)
+    for k in range(len(D)):
+        assert np.array_equal(bulk[k], cm.best_slack_completion(D[k]))
+
+
 # ---------------------------------------------------------------- validation & preprocessing
 def test_enumerate_matches_brute_force():
     q = random_qubo(10, seed=5)

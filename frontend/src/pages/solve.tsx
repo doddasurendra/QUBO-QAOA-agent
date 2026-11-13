@@ -111,7 +111,17 @@ export function IndustryPage() {
   return (
     <Page title="Industry Solutions" subtitle="Reusable formulations for finance, healthcare, telecom, energy, logistics and manufacturing.">
       <ErrorBox error={err} />
-      <div className="flex flex-wrap gap-2">{probs?.map((p: any) => <button key={p.key} className={key === p.key ? "btn" : "btn-secondary"} onClick={() => setKey(p.key)}>{p.industry}: {p.title.split(" (")[0]}</button>)}</div>
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {Array.from(new Set<string>((probs ?? []).map((p: any) => p.industry as string))).map((ind: string) => (
+          <Card key={ind} title={ind.charAt(0).toUpperCase() + ind.slice(1)}>
+            <div className="flex flex-col gap-1">
+              {probs!.filter((p: any) => p.industry === ind).map((p: any) => (
+                <button key={p.key} className={`text-left ${key === p.key ? "btn" : "btn-secondary"}`} onClick={() => setKey(p.key)} title={p.description}>{p.title}</button>
+              ))}
+            </div>
+          </Card>
+        ))}
+      </div>
       {desc && <div className="grid gap-4 lg:grid-cols-2">
         <Card title={desc.title}>
           <p className="text-sm">{desc.description}</p>

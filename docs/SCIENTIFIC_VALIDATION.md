@@ -1,6 +1,6 @@
 # Scientific validation report
 
-Generated 2026-11-13T08:25:57.870600+00:00 by `backend/scripts/generate_reports.py` · qopt 0.1.0 · Python 3.12.0 · NumPy 2.5.4
+Generated 2026-11-13T09:28:07.493759+00:00 by `backend/scripts/generate_reports.py` · qopt 0.1.0 · Python 3.12.0 · NumPy 2.5.4
 
 Every check below was executed; nothing is hand-entered.
 
@@ -36,11 +36,27 @@ For every decision assignment: feasible ⇒ QUBO energy = objective; infeasible 
 | problem | decision vars | slack vars | feasible / total | best objective | pass |
 |---|---|---|---|---|---|
 | finance.portfolio | 6 | 4 | 52 / 64 | -0.3275 | ✅ |
+| finance.investment_allocation | 9 | 0 | 43 / 512 | -0.0562222 | ✅ |
+| finance.fraud_feature_selection | 8 | 0 | 56 / 256 | -0.996815 | ✅ |
+| finance.transaction_scheduling | 11 | 10 | 18 / 2048 | 6 | ✅ |
 | healthcare.staff_scheduling | 11 | 7 | 36 / 2048 | 5 | ✅ |
+| healthcare.operating_room_scheduling | 16 | 16 | 88 / 65536 | 2 | ✅ |
+| healthcare.clinical_trial_sites | 8 | 14 | 23 / 256 | 355 | ✅ |
+| healthcare.compound_selection | 8 | 0 | 56 / 256 | -1.83 | ✅ |
 | telecom.base_station_assignment | 12 | 6 | 26 / 4096 | 7 | ✅ |
+| telecom.spectrum_allocation | 15 | 0 | 243 / 32768 | 0.54 | ✅ |
+| telecom.network_routing | 7 | 6 | 4 / 128 | 12.3333 | ✅ |
 | energy.ev_charging | 9 | 3 | 21 / 512 | 33.5 | ✅ |
+| energy.unit_commitment | 12 | 9 | 75 / 4096 | 335 | ✅ |
+| energy.battery_scheduling | 14 | 0 | 70 / 16384 | -72 | ✅ |
 | logistics.delivery_routing | 9 | 0 | 6 / 512 | 14 | ✅ |
+| logistics.vehicle_routing | 11 | 6 | 10 / 2048 | 38.48 | ✅ |
+| logistics.cargo_loading | 10 | 6 | 108 / 1024 | 31 | ✅ |
+| logistics.dock_scheduling | 16 | 0 | 36 / 65536 | 4 | ✅ |
 | manufacturing.machine_scheduling | 8 | 0 | 8 / 256 | 72 | ✅ |
+| manufacturing.job_shop | 12 | 0 | 26 / 4096 | 6 | ✅ |
+
+Each module's optimum is additionally checked against an independent brute-force solver written directly from the problem definition (no Model / QUBO): `tests/test_industries_reference.py`.
 
 ## 3. Classical solvers vs exhaustive optimum (random QUBOs, n = 14, 10 seeds)
 
@@ -87,4 +103,4 @@ Tested in `tests/test_qaoa.py::test_xy_mixer_matches_qiskit_and_preserves_one_ho
 - QAOA results here are exact noiseless simulation. No real-QPU runs were performed (no credentials configured).
 - Penalty dominance is guaranteed for integer-coefficient constraints; non-integer equality constraints are flagged with a warning and must be checked via `validate_compiled`.
 
-Total generation time: 5.6 s
+Total generation time: 21.6 s

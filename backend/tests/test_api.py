@@ -123,7 +123,10 @@ def test_api_key_auth_and_revocation(admin_client):
 def test_datasets_samples_upload_validation(admin_client):
     api = admin_client
     ds = api.get("/api/datasets").json()
-    assert len([d for d in ds if d["is_sample"]]) == 6 and all("SAMPLE" in d["name"] for d in ds if d["is_sample"])
+    from qopt.industries import PROBLEMS
+    samples = [d for d in ds if d["is_sample"]]
+    assert len(samples) == len(PROBLEMS) and {d["problem_key"] for d in samples} == set(PROBLEMS)
+    assert all("SAMPLE" in d["name"] for d in samples)
     bad = api.post("/api/datasets", json={"name": "bad", "problem_key": "finance.portfolio", "content": {"x": 1}})
     assert bad.status_code == 422
     r = api.post("/api/datasets/upload", files={"file": ("d.exe", b"MZ", "application/octet-stream")},

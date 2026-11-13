@@ -117,7 +117,7 @@ def validate_compiled(cm: CompiledModel, tol: float = 1e-7) -> ExhaustiveReport:
         E = Eall.reshape(1 << ns, 1 << nd).min(axis=0)  # decision bits are low-order
         full_min_mode = "exhaustive_over_slack"
     else:
-        E = np.array([cm.qubo.energy(cm.best_slack_completion(d)) for d in D])
+        E = cm.qubo.energies(_vectorised_slack_completion(cm, D, eval_expr))
         full_min_mode = "analytic_slack_completion"
 
     checks: Dict[str, dict] = {}
@@ -154,6 +154,28 @@ def validate_compiled(cm: CompiledModel, tol: float = 1e-7) -> ExhaustiveReport:
     passed = all(c.get("passed", True) for c in checks.values()) and not issues
     return ExhaustiveReport(passed, checks, int(len(D)), gmin, argmin, bf_obj, best_feasible,
                             int(feasible.sum()), issues)
+
+
+def _vectorised_slack_completion(cm: CompiledModel, D: np.ndarray, eval_expr) -> np.ndarray:
+    """Same result as CompiledModel.best_slack_completion for every row of D, computed in bulk.
+
+    Each slack block appears only in its own constraint's penalty, so its optimal value is
+    clamp(−lhs, 0, max_slack); the greedy decomposition over weights sorted descending is exact
+    because the weights are 1, 2, 4, …, remainder."""
+    full = np.zeros((len(D), cm.qubo.num_variables), dtype=np.int8)
+    full[:, : cm.num_decision] = D
+    idx = cm.qubo.index
+    for info in cm.slacks:
+        c = next(cc for cc in cm.model.constraints if cc.label == info.constraint)
+        lhs = c.lhs if c.sense == "<=" else -c.lhs
+        if c.resolution is not None and not lhs.is_integral():
+            lhs = lhs * (1.0 / c.resolution)
+        target = np.rint(np.clip(-eval_expr(lhs), 0.0, info.max_slack)).astype(np.int64)
+        for n, w in sorted(zip(info.variables, info.weights), key=lambda t: -t[1]):
+            bit = (target >= int(w)).astype(np.int8)
+            target -= int(w) * bit
+            full[:, idx[n]] = bit
+    return full
 
 
 def validate_qubo(qubo: QUBO) -> dict:

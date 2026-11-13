@@ -55,6 +55,8 @@ def validation_report() -> str:
         rep = validate_compiled(cm)
         L.append(f"| {key} | {cm.num_decision} | {len(cm.slack_variables)} | {rep.num_feasible} / {rep.num_states} | "
                  f"{rep.best_feasible_objective:.6g} | {'✅' if rep.passed else '❌ ' + '; '.join(rep.issues)} |")
+    L += ["", "Each module's optimum is additionally checked against an independent brute-force solver written "
+          "directly from the problem definition (no Model / QUBO): `tests/test_industries_reference.py`."]
 
     # 3. Solvers vs exhaustive
     L += ["", "## 3. Classical solvers vs exhaustive optimum (random QUBOs, n = 14, 10 seeds)", "",
@@ -117,6 +119,8 @@ def main():
     DOCS.mkdir(exist_ok=True)
     (DOCS / "SCIENTIFIC_VALIDATION.md").write_text(validation_report(), encoding="utf-8")
     print("wrote SCIENTIFIC_VALIDATION.md")
+    if "--validation-only" in sys.argv:
+        return
     rep = run_benchmark(["maxcut_gnp", "maxcut_3regular", "number_partitioning", "knapsack"], [6, 8, 10], seeds=5,
                         qaoa_depths=[1, 2, 3], qaoa_shots=1024, qaoa_maxiter=150)
     (DOCS / "BENCHMARK_REPORT.md").write_text(to_markdown(rep), encoding="utf-8")

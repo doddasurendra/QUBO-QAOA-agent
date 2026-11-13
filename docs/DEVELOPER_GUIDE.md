@@ -9,7 +9,8 @@ backend/
   qopt/quantum     statevector QAOA (adjoint gradients), mixers, Qiskit circuits, bit-order helpers
   qopt/providers   Aer, IBM Runtime, Amazon Braket, D-Wave (annealer) + registry
   qopt/hybrid      solver recommendation + hybrid execution + ranking
-  qopt/industries  6 industry templates (schema, formulation, interpretation, sample data)
+  qopt/industries  20 industry templates (schema, formulation, interpretation, sample data);
+                   *_ext.py hold the second-wave modules
   qopt/agents      Claude tool-use orchestrator, 10 agent roles, tool registry
   qopt/services    jobs, audit, security, research search, reports, agent persistence bridge
   qopt/api         FastAPI app and routers
@@ -42,7 +43,11 @@ QAOA unitary equality with Qiskit, adjoint gradient = finite differences.
 
 - **Industry problem**: subclass `IndustryProblem` (pydantic `Input`, `build_model`, `interpret`,
   `example`), register in `industries/__init__.py`. `tests/test_industries_hybrid.py` automatically
-  validates its example exhaustively — keep examples ≤ 18 decision variables.
+  validates its example exhaustively — keep examples ≤ 18 decision variables. `interpret` must return at
+  least one `*_ok` domain check. Add an independent brute-force reference in
+  `tests/test_industries_reference.py` that enumerates domain decisions without using `Model`.
+  Prefer slack-free encodings (one-hot state variables, pairwise `x·y == 0` conflicts) where possible:
+  they keep qubit counts within simulator range and are compatible with the XY mixer.
 - **Mixer**: subclass `quantum.mixers.Mixer` (initial state, components with generators, Qiskit gates).
   Add a fidelity test against Qiskit and a gradient test.
 - **Provider**: subclass `providers.base.Provider`; derive `is_real_hardware` from backend metadata only;

@@ -102,7 +102,7 @@ def create_app() -> FastAPI:
 
     # Serve the built frontend if present (single-container deployment)
     dist = Path(__file__).resolve().parents[3] / "frontend" / "dist"
-    if dist.is_dir():
+    if (dist / "index.html").is_file() and (dist / "assets").is_dir():
         app.mount("/assets", StaticFiles(directory=dist / "assets"), name="assets")
 
         @app.get("/{path:path}", include_in_schema=False)

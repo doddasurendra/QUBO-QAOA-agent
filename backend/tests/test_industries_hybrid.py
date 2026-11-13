@@ -18,14 +18,20 @@ def test_industry_example_formulations_are_exact(key):
     rep = validate_compiled(cm)
     assert rep.passed, rep.issues
     assert rep.num_feasible > 0
-    best = exhaustive(cm.qubo)
+    from qopt.solvers import milp_solve
+    best = exhaustive(cm.qubo) if cm.qubo.num_variables <= 16 else milp_solve(cm.qubo)
+    assert best.optimal
     ev = cm.evaluate(best.best_x)
     assert ev.feasible
+    assert ev.objective == pytest.approx(rep.best_feasible_objective)
     interp = prob.interpret(data, ev.assignment)
+    checked = 0
     for k, v in interp.items():
         if k.endswith("_ok") or k in ("valid_tour", "within_budget", "each_user_assigned_once",
                                        "requirements_met", "all_jobs_assigned_once"):
             assert v is True, (k, interp)
+            checked += 1
+    assert checked >= 1, f"{key}: interpret() exposes no domain feasibility checks"
 
 
 def test_industry_describe_has_schema_and_marks_sample_data():

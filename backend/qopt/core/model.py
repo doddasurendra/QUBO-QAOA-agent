@@ -346,6 +346,8 @@ class CompiledModel:
             if c.kind != "one_hot":
                 continue
             g = [idx[v] for v in c.lhs.lin]
+            if len(g) < 2:      # a single-variable "group" is just x == 1; nothing to mix
+                continue
             if used.intersection(g):
                 return []  # overlapping groups are not supported by the XY mixer
             used.update(g)

@@ -22,7 +22,7 @@ has been made.
 | Circuits | Qiskit circuit, gate list for UI, OpenQASM 3, text diagram; Aer bit-order verified | `tests/test_qaoa.py` |
 | Providers | Aer (ideal + synthetic noise), IBM Runtime (SamplerV2), Amazon Braket (native circuit; IonQ/Rigetti/IQM via ARNs), D-Wave annealer (labelled `qpu_annealer`); honest status; approval enforced | mocked IBM backend refused without approval; missing SDK/creds → explicit errors |
 | Hybrid engine | transparent recommendations with reasons, execution, ranking vs proven/best optimum, no-advantage note | `tests/test_industries_hybrid.py` |
-| Industries | finance portfolio; healthcare staff scheduling; telecom base-station assignment; energy EV charging; logistics delivery routing (TSP); manufacturing machine load balancing — each with schema, formulation, interpretation, sample data, API | exhaustive validation of every example |
+| Industries (20 modules) | **Finance:** portfolio selection, discrete investment allocation (multi-bit weights), fraud-detection feature selection, transaction settlement scheduling · **Healthcare:** staff scheduling, operating-room scheduling, clinical-trial site selection, drug-discovery compound subset selection · **Telecom:** base-station assignment, spectrum allocation, capacity-aware network routing · **Energy:** EV charging, unit commitment, battery arbitrage · **Logistics:** delivery TSP, capacitated vehicle routing (cluster-first), cargo loading (multiple knapsack), warehouse dock scheduling · **Manufacturing:** machine load balancing, time-indexed job-shop — each with schema, formulation, limitations, interpretation with domain checks, SAMPLE data, API | exhaustive validation of every example (`SCIENTIFIC_VALIDATION.md` §2) **and** an independent brute-force solver per new module written from the problem definition (`tests/test_industries_reference.py`, 14 tests) |
 | Agents | 10 roles, tool allow-lists, manual Claude tool-use loop (official SDK, `claude-opus-5-5`, explicit effort, server-side refusal fallback), delegation with depth limit, iteration/token/USD budgets, needs-input halt, approval-only hardware tool, usage & cost tracking, persistence of agent-created models | `tests/test_agents.py` (11) with scripted fake client and real tools |
 | Persistence | SQLAlchemy 2 models (9 tables), Alembic migration `0001`, SQLite default / PostgreSQL URL | migrations run in every API test |
 | API & security | FastAPI: JWT + API keys (hashed), RBAC admin/researcher/viewer, bootstrap-once admin, login throttling, per-user & per-IP rate limits, upload type/size limits, schema validation, job quotas & timeouts, approval workflow, audit log with secret redaction, security headers, structured JSON logs | `tests/test_api.py` (15); live HTTP smoke test 27/27 |
@@ -32,8 +32,8 @@ has been made.
 
 ## Tests
 
-- **Passed:** backend `pytest` **111 / 111** (core 33, solvers 13, QAOA 23, industries/hybrid 15, agents 11,
-  API 16); live HTTP smoke test against a running server **27 / 27**; frontend `tsc` + `vite build` clean.
+- **Passed:** backend `pytest` **140 / 140** (core 34, solvers 13, QAOA 23, industries/hybrid 29,
+  industry reference solvers 14, agents 11, API 16); live HTTP smoke test against a running server **27 / 27**; frontend `tsc` + `vite build` clean.
 - **Failed:** none outstanding. During development the tests caught and I fixed: IBM provider importing
   its SDK before the availability check; a delegation permission check that ran after the sub-agent; the
   SPA fallback answering unknown `/api/*` paths with `index.html` (now JSON 404). Two wrong
@@ -50,10 +50,18 @@ has been made.
 - Running jobs cannot be interrupted (timeout marks status; late results are stored with `late=true`).
 - Statevector QAOA ≤ 22 qubits; exhaustive validation ≤ 20 decision variables. Hardware QAOA for larger
   problems falls back to un-optimised linear-ramp angles (flagged in the result).
-- Industry coverage is one model per industry. Not built: fraud detection, transaction scheduling,
-  clinical-trial planning, drug discovery, spectrum allocation, routing beyond a single vehicle (CVRP),
-  battery and generation scheduling, warehouse scheduling, job-shop sequencing.
-- Machine scheduling minimises Σ load² (a makespan proxy, stated in the module).
+- Industry modelling simplifications (each is stated in its module's `limitations`): machine scheduling
+  minimises Σ load² (a makespan proxy); job-shop minimises total weighted completion time (not makespan);
+  unit commitment ignores economic dispatch, ramp rates and min up/down times; the battery model has no
+  efficiency losses; vehicle routing is a cluster-first/route-second heuristic (it matched the exact CVRP
+  optimum on the example, which is not guaranteed in general); fraud selection uses Pearson correlation and
+  does not train a classifier; compound selection needs upstream activity and similarity scores.
+- Still not built: production planning (lot sizing with inventory), supply-chain network design, renewable
+  allocation and demand response as separate modules.
+- Operating-room scheduling (32 qubits) and other slack-heavy examples exceed the 22-qubit statevector
+  limit, so they are classical-only unless hardware is configured. The hybrid engine skips simulated QAOA for them automatically.
+- MILP (HiGHS) is slow on QUBOs dominated by squared-penalty terms (about 30 s for the 22-variable
+  clinical-trial example on a loaded machine); exhaustive search or tabu is often faster at that size.
 - PennyLane, Cirq and OpenFermion are not used; Qiskit plus an independent NumPy simulator cross-check each other. Quantinuum and Azure Quantum are not integrated.
 - PDF ingestion needs `pypdf` on the server (installed in the Docker image, not in the dev venv).
 - Frontend bundle is ~726 kB (not code-split).
@@ -79,5 +87,6 @@ has been made.
 3. Browser E2E tests (Playwright) for the 24 pages; code-split the bundle.
 4. `docker compose up` on a Docker host; run the suite against PostgreSQL.
 5. Redis-backed job queue and rate limiting for multi-replica deployments; cooperative cancellation.
-6. Remaining industry sub-modules (listed above); multi-bit (fractional) portfolio weights.
+6. Production planning / supply-chain modules; hardware-efficient (slack-free) encodings for the
+   slack-heavy modules so they fit simulator limits.
 7. Hardware-aware compilation analysis (routing overhead, estimated fidelity) in the solver selector.
