@@ -1,6 +1,6 @@
 # Scientific validation report
 
-Generated 2026-11-13T10:03:50.869323+00:00 by `backend/scripts/generate_reports.py` · qopt 0.1.0 · Python 3.12.0 · NumPy 2.5.4
+Generated 2026-11-13T10:15:47.912598+00:00 by `backend/scripts/generate_reports.py` · qopt 0.1.0 · Python 3.12.0 · NumPy 2.5.4
 
 Every check below was executed; nothing is hand-entered.
 
@@ -49,6 +49,8 @@ For every decision assignment: feasible ⇒ QUBO energy = objective; infeasible 
 | energy.ev_charging | 9 | 3 | 21 / 512 | 33.5 | ✅ |
 | energy.unit_commitment | 12 | 9 | 75 / 4096 | 335 | ✅ |
 | energy.battery_scheduling | 14 | 0 | 70 / 16384 | -72 | ✅ |
+| energy.renewable_allocation | 6 | 5 | 47 / 64 | 3.5 | ✅ |
+| energy.demand_response | 18 | 4 | 124 / 262144 | 102.5 | ✅ |
 | logistics.delivery_routing | 9 | 0 | 6 / 512 | 14 | ✅ |
 | logistics.vehicle_routing | 11 | 6 | 10 / 2048 | 38.48 | ✅ |
 | logistics.cargo_loading | 10 | 6 | 108 / 1024 | 31 | ✅ |
@@ -106,4 +108,4 @@ Tested in `tests/test_qaoa.py::test_xy_mixer_matches_qiskit_and_preserves_one_ho
 - QAOA results here are exact noiseless simulation. No real-QPU runs were performed (no credentials configured).
 - Penalty dominance is guaranteed for integer-coefficient constraints; non-integer equality constraints are flagged with a warning and must be checked via `validate_compiled`.
 
-Total generation time: 9.7 s
+Total generation time: 41.7 s

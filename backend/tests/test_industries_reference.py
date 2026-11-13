@@ -159,6 +159,26 @@ def test_battery_reference():
     assert out["net_profit"] > 0
 
 
+def test_renewable_allocation_reference():
+    from qopt.industries.energy_flex import renewable_objective
+    p, d, ev, out = qubo_optimum("energy.renewable_allocation")
+    vals = [renewable_objective(d, [j for j, b in enumerate(bits) if b])
+            for bits in itertools.product([0, 1], repeat=len(d.projects))]
+    assert ev.objective == pytest.approx(min(v for v in vals if v is not None))
+    assert out["budget_ok"]
+    # complementarity: the optimum mixes solar with wind rather than using a single technology
+    techs = {s.split("(")[1].rstrip(")") for s in out["selected_projects"]}
+    assert {"solar", "wind"} <= techs
+
+
+def test_demand_response_reference():
+    from qopt.industries.energy_flex import dr_cost
+    p, d, ev, out = qubo_optimum("energy.demand_response")
+    vals = [dr_cost(d, list(st)) for st in itertools.product(*[d.starts(i) for i in range(len(d.loads))])]
+    assert ev.objective == pytest.approx(min(v for v in vals if v is not None)) == pytest.approx(out["objective"])
+    assert out["event_limits_ok"]
+
+
 # ------------------------------------------------------------------ logistics
 def test_vehicle_routing_reference():
     p, d, ev, out = qubo_optimum("logistics.vehicle_routing")

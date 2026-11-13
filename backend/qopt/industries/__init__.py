@@ -3,6 +3,7 @@ from typing import Dict
 from .base import IndustryProblem
 from .energy import EVCharging
 from .energy_ext import BatteryScheduling, UnitCommitment
+from .energy_flex import DemandResponse, RenewableAllocation
 from .finance import PortfolioSelection
 from .finance_ext import FraudFeatureSelection, InvestmentAllocation, TransactionScheduling
 from .healthcare import NurseScheduling
@@ -23,7 +24,7 @@ PROBLEMS: Dict[str, IndustryProblem] = {p.key: p for p in (
     # telecommunications
     BaseStationAssignment(), SpectrumAllocation(), NetworkRouting(),
     # energy
-    EVCharging(), UnitCommitment(), BatteryScheduling(),
+    EVCharging(), UnitCommitment(), BatteryScheduling(), RenewableAllocation(), DemandResponse(),
     # logistics
     DeliveryRouting(), VehicleRouting(), CargoLoading(), DockScheduling(),
     # manufacturing
