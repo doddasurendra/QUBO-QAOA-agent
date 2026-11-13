@@ -1,101 +1,126 @@
-﻿# PROJECT_STATUS
+# PROJECT_STATUS
 
-_Last updated: 2026-11-13 Â· version 0.1.0_
+_Last updated: 2026-11-13 · version 0.1.0_
 
 ## Summary
 
-Built from an empty repository. The mathematical engine, QAOA engine, classical solvers, hybrid engine,
-provider framework, 10 Claude agents, 6 industry modules, persistence, REST API with security controls,
-and a 24-page React dashboard are implemented and tested. **Everything runs in SIMULATOR mode**: no quantum
-hardware credentials and no Anthropic API key were available, so no real-QPU job and no live Claude call
-has been made.
+Built from an empty repository: mathematical (QUBO/Ising) engine, QAOA engine, classical solvers, hybrid
+engine, quantum-provider framework, 10 Claude agents, **27 industry modules**, persistence, a REST API with
+security controls, a 24-page React dashboard, and a deployment setup verified from an installed package.
+**Everything runs in SIMULATOR mode**: no quantum-hardware credentials and no Anthropic API key were available,
+so no real-QPU job and no live Claude API call has been made.
+
+## Milestones
+
+| # | milestone | status | commit |
+|---|---|---|---|
+| 1 | Core QUBO/Ising engine, classical solvers, QAOA, providers, hybrid engine, first 6 industry modules | done | `70bbd1d` |
+| 2 | Claude agent orchestrator, persistence, FastAPI with auth/RBAC/approvals/jobs | done | `8852b8c` |
+| 3 | Frontend (24 pages), reports, docs, deployment config | done | `894cfea` |
+| 4 | 14 more industry modules + independent reference tests | done | `a9b96a5` |
+| 5 | Production planning, facility location, supplier selection | done | `ba60972` |
+| 6 | Renewable allocation, demand response | done | `09642b0` |
+| 7 | Multi-echelon supply chain (two-echelon network design, multi-echelon replenishment) | done | `3f29e69` |
+| 8 | Installed-package deployment fix (migrations packaged, configurable paths, Docker/env hardening) | done | `9c885a2` |
 
 ## Completed (implemented + tested)
 
 | area | what | evidence |
 |---|---|---|
-| QUBO engine | Expr/Model builder, linear/quadratic terms, equality & inequality (exact bounded binary slack), quadratic `xÂ·y == 0` constraints, auto penalty with proof bound, upper/symmetric/sparse matrices, JSON serialization, matrix import (any convention), normalization, safe variable fixing, infeasibility detection | `tests/test_core_qubo.py` (33) |
-| Ising | QUBOâ†’Ising, Isingâ†’QUBO, spin/bit maps, Qiskit-ordered Pauli terms | exhaustive equivalence, errors â‰¤ 2e-14 (`docs/SCIENTIFIC_VALIDATION.md` Â§1) |
-| Validation framework | exhaustive: feasible energy = objective, penalty dominance, argmin feasibility, Ising equivalence | all 6 industry examples pass (Â§2) |
-| Classical solvers | exhaustive, MILP (HiGHS, sign-aware Fortet), simulated annealing (vectorised), tabu, greedy | `tests/test_solvers.py`; 10/10 optimal vs exhaustive (Â§3) |
-| QAOA | statevector simulator, X and ring-XY mixers, custom `Mixer` interface, adjoint gradients, COBYLA/Nelder-Mead/Powell/L-BFGS-B/BFGS/SLSQP/SPSA/Adam, linear-ramp/random/INTERP init, restarts, history, sampling, feasibility ranking, approximation ratio, P(ground) | fidelity 1.0 vs Qiskit (Â§4); 8-ring MaxCut p=1 = 6.000000 vs theory 6 (Â§5); `tests/test_qaoa.py` (23) |
-| Circuits | Qiskit circuit, gate list for UI, OpenQASM 3, text diagram; Aer bit-order verified | `tests/test_qaoa.py` |
-| Providers | Aer (ideal + synthetic noise), IBM Runtime (SamplerV2), Amazon Braket (native circuit; IonQ/Rigetti/IQM via ARNs), D-Wave annealer (labelled `qpu_annealer`); honest status; approval enforced | mocked IBM backend refused without approval; missing SDK/creds â†’ explicit errors |
-| Hybrid engine | transparent recommendations with reasons, execution, ranking vs proven/best optimum, no-advantage note | `tests/test_industries_hybrid.py` |
-| Industries (25 modules) | **Energy (added):** renewable portfolio allocation (generationâ€“demand matching under a budget), demand response (flexible-load scheduling with event limits, peak flattening, comfort cost; XY-mixer compatible) Â· **Supply chain:** capacitated facility location (network design), risk-aware supplier selection Â· **Manufacturing (added):** multi-product production planning (lot sizing with inventory, setups, shared capacity) Â· **Finance:** portfolio selection, discrete investment allocation (multi-bit weights), fraud-detection feature selection, transaction settlement scheduling Â· **Healthcare:** staff scheduling, operating-room scheduling, clinical-trial site selection, drug-discovery compound subset selection Â· **Telecom:** base-station assignment, spectrum allocation, capacity-aware network routing Â· **Energy:** EV charging, unit commitment, battery arbitrage Â· **Logistics:** delivery TSP, capacitated vehicle routing (cluster-first), cargo loading (multiple knapsack), warehouse dock scheduling Â· **Manufacturing:** machine load balancing, time-indexed job-shop â€” each with schema, formulation, limitations, interpretation with domain checks, SAMPLE data, API | exhaustive validation of every example (`SCIENTIFIC_VALIDATION.md` Â§2) **and** an independent brute-force solver per new module written from the problem definition (`tests/test_industries_reference.py`, 19 tests) Â· XY-mixer QAOA run end-to-end on the 22-qubit demand-response example: the best sample equalled the proven optimum (102.5), approximation ratio 0.988, but P(ground) was only 0.0004 (â‰ˆ 4 min runtime) |
-| Quadratic logical constraints | `xÂ·y == 0` and implication constraints such as `xÂ·(1âˆ’z) == 0` (exact PÂ·lhs penalty, no slack); non-negativity proved by exact enumeration of the constraint's variables (â‰¤ 16), unsatisfiable ones rejected at compile time | `tests/test_industries_hybrid.py::test_quadratic_equality_conflict_constraint` |
-| Agents | 10 roles, tool allow-lists, manual Claude tool-use loop (official SDK, `claude-opus-5-5`, explicit effort, server-side refusal fallback), delegation with depth limit, iteration/token/USD budgets, needs-input halt, approval-only hardware tool, usage & cost tracking, persistence of agent-created models | `tests/test_agents.py` (11) with scripted fake client and real tools |
-| Persistence | SQLAlchemy 2 models (9 tables), Alembic migration `0001`, SQLite default / PostgreSQL URL | migrations run in every API test |
-| API & security | FastAPI: JWT + API keys (hashed), RBAC admin/researcher/viewer, bootstrap-once admin, login throttling, per-user & per-IP rate limits, upload type/size limits, schema validation, job quotas & timeouts, approval workflow, audit log with secret redaction, security headers, structured JSON logs | `tests/test_api.py` (15); live HTTP smoke test 27/27 |
-| Frontend | 24 pages, all wired to real endpoints; execution-kind badges on every result; SAMPLE data labelled | `tsc` clean, `vite build` OK; every page's API call exercised by the live smoke test |
-| Reports | Markdown/JSON job reports; generated validation & benchmark reports | `docs/SCIENTIFIC_VALIDATION.md`, `docs/BENCHMARK_REPORT.md` |
-| Deployment | Dockerfile (non-root, SPA + API), docker-compose with PostgreSQL, `.env.example`, GitHub Actions CI (tests, pip-audit, npm audit, docker build) | written, **not executed here** (see below) |
+| QUBO engine | Expr/Model builder, linear/quadratic terms, equality & inequality (exact bounded binary slack), auto penalty with proof bound, upper/symmetric/sparse matrices, JSON serialisation, matrix import (any convention), normalisation, safe variable fixing, infeasibility detection, vectorised exhaustive validation | `tests/test_core_qubo.py` (34) |
+| Quadratic logical constraints | `x·y == 0` conflicts and implications such as `x·(1−z) == 0` (exact P·lhs penalty, no slack); non-negativity proved by exact enumeration of the constraint's variables (≤ 16); unsatisfiable ones rejected at compile time | `tests/test_industries_hybrid.py` |
+| Ising | QUBO→Ising, Ising→QUBO, spin/bit maps, Qiskit-ordered Pauli terms | exhaustive equivalence, errors ≤ 2e-14 (`docs/SCIENTIFIC_VALIDATION.md` §1) |
+| Classical solvers | exhaustive, MILP (HiGHS, sign-aware Fortet), simulated annealing (vectorised), tabu, greedy | `tests/test_solvers.py` (13); 10/10 optimal vs exhaustive (§3) |
+| QAOA | statevector simulator, X and ring-XY mixers, custom `Mixer` interface, adjoint gradients, COBYLA / Nelder-Mead / Powell / L-BFGS-B / BFGS / SLSQP / SPSA / Adam, linear-ramp / random / INTERP init, restarts, history, sampling, feasibility ranking, approximation ratio, P(ground) | fidelity 1.0 vs Qiskit (§4); 8-ring MaxCut p=1 = 6.000000 vs theory 6 (§5); `tests/test_qaoa.py` (23) |
+| Circuits | Qiskit circuit, gate list for the UI, OpenQASM 3, text diagram; Aer bit order verified | `tests/test_qaoa.py` |
+| Providers | Aer (ideal + synthetic noise), IBM Runtime (SamplerV2), Amazon Braket (IonQ/Rigetti/IQM via ARNs), D-Wave annealer (labelled `qpu_annealer`); honest availability status; approval enforced | mocked IBM backend refused without approval; missing SDK/credentials → explicit errors |
+| Hybrid engine | transparent recommendations with reasons, execution, ranking against the proven/best optimum, no-advantage note | `tests/test_industries_hybrid.py` |
+| Industries (27) | **Finance:** portfolio selection, discrete investment allocation, fraud-detection feature selection, transaction settlement scheduling · **Healthcare:** staff scheduling, operating-room scheduling, clinical-trial site selection, drug-discovery compound selection · **Telecom:** base-station assignment, spectrum allocation, network routing · **Energy:** EV charging, unit commitment, battery arbitrage, renewable portfolio allocation, demand response · **Logistics:** delivery TSP, capacitated vehicle routing, cargo loading, warehouse dock scheduling · **Manufacturing:** machine load balancing, job-shop scheduling, production planning · **Supply chain:** facility location, supplier selection, two-echelon network design, multi-echelon replenishment. Each has a schema, formulation, limitations, interpretation with domain checks, SAMPLE data and API | every example validated exhaustively (§2, 27/27 ✅) **and**, for the 21 later modules, checked against an independent brute-force solver written from the problem definition (`tests/test_industries_reference.py`, 22 tests) |
+| Agents | 10 roles, tool allow-lists, manual Claude tool-use loop (official SDK, `claude-opus-5-5`, explicit effort, server-side refusal fallback), delegation with depth limit, iteration/token/USD budgets, needs-input halt, approval-only hardware tool, usage & cost tracking | `tests/test_agents.py` (11), scripted fake client + real tools |
+| Persistence | SQLAlchemy 2 models (9 tables), Alembic migration `0001` **shipped inside the package** (`qopt/migrations`), SQLite default / PostgreSQL URL | migrations run in every API test and from an installed package |
+| API & security | JWT + hashed API keys, RBAC admin/researcher/viewer, bootstrap-once admin, login throttling, per-user & per-IP rate limits, upload limits, schema validation, job quotas & timeouts, approval workflow, audit log with secret redaction, security headers, structured JSON logs; production refuses missing or weak JWT secrets | `tests/test_api.py` (16), `tests/test_deployment.py` (6) |
+| Frontend | 24 pages wired to real endpoints, industry templates grouped by sector, execution-kind badges, SAMPLE data labelled | `tsc` clean, `vite build` OK; every page's API call exercised live |
+| Deployment | Dockerfile (installs the package, runs from `/app`, non-root, healthcheck), `.dockerignore`, docker-compose with PostgreSQL, `.env.example` covering every setting, GitHub Actions CI | installed-package runtime verified live, 12/12 checks (below); `docker build` not run here |
 
 ## Tests
 
-- **Passed:** backend `pytest` **150 / 150** (core 34, solvers 13, QAOA 23, industries/hybrid 34,
-  industry reference solvers 19, agents 11, API 16); live HTTP smoke test against a running server **27 / 27**; frontend `tsc` + `vite build` clean.
-- **Failed:** none outstanding. During development the tests caught and I fixed: IBM provider importing
-  its SDK before the availability check; a delegation permission check that ran after the sub-agent; the
-  SPA fallback answering unknown `/api/*` paths with `index.html` (now JSON 404). Two wrong
-  hand-computed test expectations were also corrected (the engine was right).
+- **Passed:** backend `pytest` **161 / 161** (core 34, solvers 13, QAOA 23, industries/hybrid 36, industry
+  reference solvers 22, agents 11, API 16, deployment 6). Frontend `tsc` + `vite build` clean. Two live
+  checks: the HTTP smoke test against a source-tree server (27/27), and the **installed-package** server in
+  production mode started from outside the source tree, i.e. the Docker runtime layout (12/12: health,
+  OpenAPI, SPA + assets, migrations, login, docs, all modules + samples, a background multi-echelon job, no
+  secret leakage).
+- **Failed:** none outstanding. Bugs found and fixed along the way:
+  - the IBM provider imported its SDK before checking availability;
+  - a delegation permission check ran after the sub-agent had already executed;
+  - the SPA fallback answered unknown `/api/*` paths with `index.html`;
+  - a slow per-row slack completion in validation (now vectorised);
+  - single-variable one-hot groups were passed to the XY mixer;
+  - an infeasible multi-echelon sample example (now caught by a DC-level check);
+  - **installed deployments crashed at startup** (migrations and other paths resolved against a source tree that doesn't exist after install);
+  - the Dockerfile copied a missing directory and had no `.dockerignore`;
+  - `.env.example` shipped a non-empty placeholder JWT secret.
 
 ## Not verified / known limitations
 
-- **No real quantum hardware run.** IBM is tested against a mocked service only; the Braket and D-Wave
-  submission code is untested against live services.
-- **No live Claude API call.** Agent behaviour with the real model is untested; orchestration is tested with a scripted client.
-- **Docker / docker-compose / PostgreSQL not run** (Docker is not installed on this machine; tests use SQLite).
-- **UI not clicked through in a browser** (the Chrome extension was not connected). Every endpoint each page uses was exercised over HTTP against the live server, and the UI compiles, but layout and interaction bugs may remain. There are no automated UI tests.
-- Jobs run on an in-process thread pool; rate limits are in-process; Redis is not implemented â†’ run a single API process.
-- Running jobs cannot be interrupted (timeout marks status; late results are stored with `late=true`).
-- Statevector QAOA â‰¤ 22 qubits; exhaustive validation â‰¤ 20 decision variables. Hardware QAOA for larger
-  problems falls back to un-optimised linear-ramp angles (flagged in the result).
-- Industry modelling simplifications (each is stated in its module's `limitations`): machine scheduling
-  minimises Î£ loadÂ² (a makespan proxy); job-shop minimises total weighted completion time (not makespan);
-  unit commitment ignores economic dispatch, ramp rates and min up/down times; the battery model has no
-  efficiency losses; vehicle routing is a cluster-first/route-second heuristic (it matched the exact CVRP
-  optimum on the example, which is not guaranteed in general); fraud selection uses Pearson correlation and
-  does not train a classifier; compound selection needs upstream activity and similarity scores.
-- Production planning: integer units (â‰¤ 7 per product-period), no backlogging, lead times or multi-level bills
-  of materials. Facility location: single echelon, single sourcing, deterministic demand. Supplier risk:
-  pairwise same-region penalty, not a probabilistic disruption model.
-- Production planning (40 qubits) and facility location (27 qubits) exceed the statevector limit; MILP
-  proves their optima in about 15â€“25 s. **Heuristics can miss:** tabu search found the production-planning optimum
-  (39) but returned 123 against the true optimum of 90 on the facility-location example.
-- Renewable allocation penalises shortfall and curtailment symmetrically and uses deterministic generation
-  forecasts; demand response assumes uninterrupted constant-power loads and models comfort only as a
-  start-time deviation cost.
-- Still not built: multi-echelon supply chains; stochastic (scenario-based) renewable forecasts.
-- Operating-room scheduling (32 qubits) and other slack-heavy examples exceed the 22-qubit statevector
-  limit, so they are classical-only unless hardware is configured. The hybrid engine skips simulated QAOA for them automatically.
-- MILP (HiGHS) is slow on QUBOs dominated by squared-penalty terms (about 30 s for the 22-variable
-  clinical-trial example on a loaded machine); exhaustive search or tabu is often faster at that size.
-- PennyLane, Cirq and OpenFermion are not used; Qiskit plus an independent NumPy simulator cross-check each other. Quantinuum and Azure Quantum are not integrated.
-- PDF ingestion needs `pypdf` on the server (installed in the Docker image, not in the dev venv).
-- Frontend bundle is ~726 kB (not code-split).
-- Benchmarks: small instances only; **no quantum advantage is claimed or demonstrated**.
+- **No real quantum hardware run.** IBM is tested against a mocked service only; the Braket and D-Wave submission
+  code is untested against live services.
+- **No live Claude API call.** Agent behaviour with the real model is untested; orchestration is tested with a
+  scripted client.
+- **`docker build` / `docker compose up` and PostgreSQL not run.** Docker, WSL2 and PostgreSQL are not installed on
+  this machine, and installing Docker Desktop needs WSL2/Hyper-V enabled with admin rights and a reboot. The
+  runtime the image uses (installed package, production mode, same paths) is verified; CI builds the image.
+- **UI not clicked through in a browser** (the Chrome extension was not connected). Every endpoint each page uses
+  was exercised over HTTP and the UI compiles, but layout and interaction bugs may remain. There are no UI tests.
+- Jobs run on an in-process thread pool and rate limits are in-process; Redis is not implemented → run a single API
+  process. Running jobs cannot be interrupted (a timeout marks the status; late results are stored with `late=true`).
+- Statevector QAOA ≤ 22 qubits; exhaustive validation ≤ 20 decision variables. Slack-heavy examples (operating
+  rooms 32, production planning 40, multi-echelon replenishment 35, two-echelon network 30, facility location 27
+  qubits) are classical-only unless hardware is configured. MILP proves their optima, but is slow on
+  penalty-dominated QUBOs (≈ 15–30 s on a loaded machine).
+- **Heuristics can miss:** tabu returned 123 against the true optimum of 90 on the facility-location example. QAOA on
+  the 22-qubit demand-response example sampled the optimum but with P(ground) ≈ 0.0004.
+- Modelling simplifications (each stated in its module's `limitations`):
+  - load balancing (Σ load²) and job-shop (weighted completion) use makespan proxies;
+  - unit commitment ignores dispatch, ramps and min up/down times; the battery model has no efficiency losses;
+  - vehicle routing is cluster-first/route-second;
+  - fraud selection uses Pearson correlation and trains no classifier; compound selection needs upstream scores;
+  - production planning allows ≤ 7 units per product-period, with no backlog or lead times;
+  - multi-echelon replenishment has zero lead time and an uncapacitated plant;
+  - two-echelon design is single-period with unsplittable flows;
+  - renewable allocation penalises shortfall and curtailment symmetrically, with deterministic forecasts.
+- PennyLane, Cirq and OpenFermion are not used; Qiskit and an independent NumPy simulator cross-check each other.
+  Quantinuum and Azure Quantum are not integrated.
+- PDF ingestion needs `pypdf` (installed in the Docker image, not the dev venv). Frontend bundle ≈ 726 kB (not
+  code-split). Benchmarks use small instances only; **no quantum advantage is claimed or demonstrated**.
 
-## Required credentials (all server-side env vars; see `.env.example`)
+## Required credentials (server-side env vars; see `.env.example`)
 
 | capability | needs |
 |---|---|
+| Deployment | `POSTGRES_PASSWORD`, `QOPT_JWT_SECRET` (≥ 32 random characters) |
 | AI agents | `ANTHROPIC_API_KEY` (Anthropic API billing; separate from a Claude subscription) |
-| IBM Quantum | `pip install qiskit-ibm-runtime` + `QISKIT_IBM_TOKEN` (+ `QISKIT_IBM_INSTANCE`) |
-| Amazon Braket (IonQ, Rigetti, IQM) | `pip install amazon-braket-sdk` + AWS credentials + `QOPT_BRAKET_S3_BUCKET` |
-| D-Wave (annealing) | `pip install dwave-ocean-sdk` + `DWAVE_API_TOKEN` |
+| IBM Quantum | `EXTRAS="[ibm]"` + `QISKIT_IBM_TOKEN` (+ `QISKIT_IBM_INSTANCE`) |
+| Amazon Braket (IonQ, Rigetti, IQM) | `EXTRAS="[braket]"` + AWS credentials + `QOPT_BRAKET_S3_BUCKET` |
+| D-Wave (annealing) | `EXTRAS="[dwave]"` + `DWAVE_API_TOKEN` |
 
 ## Hardware access status
 
-**None configured â€” SIMULATOR mode.** Available: local NumPy statevector, Qiskit Aer (ideal + synthetic noise).
+**None configured — SIMULATOR mode.** Available: local NumPy statevector, Qiskit Aer (ideal + synthetic noise).
+
+## How to run
+
+- Development: see `README.md` → Quick start (`pytest`, `npm run build`, `uvicorn qopt.api.app:app`).
+- Deployment: `cp .env.example .env`, set the two required values, then `docker compose up -d --build`, then
+  `curl http://localhost:8000/api/health`. A no-Docker recipe is in `docs/DEPLOYMENT.md`.
 
 ## Next implementation tasks
 
-1. With credentials: run a real IBM job end-to-end through the approval flow; add Braket/D-Wave integration tests.
-2. With an API key: run agent evaluations on the three NL example prompts; tune prompts and effort.
-3. Browser E2E tests (Playwright) for the 24 pages; code-split the bundle.
-4. `docker compose up` on a Docker host; run the suite against PostgreSQL.
+1. On a Docker host: `docker compose up --build`, confirm the container is `healthy`, and run the suite against PostgreSQL.
+2. With credentials: a real IBM job end-to-end through the approval flow; Braket/D-Wave integration tests.
+3. With an API key: agent evaluations on the three natural-language example prompts; tune prompts and effort.
+4. Browser E2E tests (Playwright) for the 24 pages; code-split the bundle.
 5. Redis-backed job queue and rate limiting for multi-replica deployments; cooperative cancellation.
-6. Multi-echelon supply chain and scenario-based (stochastic) renewable planning; slack-free encodings for the slack-heavy modules
-   (production planning, operating rooms, facility location) so they fit within simulator limits.
+6. Slack-free encodings for the slack-heavy modules so they fit simulator limits; lead times and plant capacity
+   in multi-echelon replenishment; scenario-based (stochastic) renewable planning.
 7. Hardware-aware compilation analysis (routing overhead, estimated fidelity) in the solver selector.
