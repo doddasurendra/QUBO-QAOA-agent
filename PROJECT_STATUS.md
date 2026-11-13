@@ -22,6 +22,7 @@ so no real-QPU job and no live Claude API call has been made.
 | 6 | Renewable allocation, demand response | done | `09642b0` |
 | 7 | Multi-echelon supply chain (two-echelon network design, multi-echelon replenishment) | done | `3f29e69` |
 | 8 | Installed-package deployment fix (migrations packaged, configurable paths, Docker/env hardening) | done | `9c885a2` |
+| 9 | Browser E2E tests (Playwright, 32 tests, all 24 pages, CI job) + the bugs they found | done | see `git log` |
 
 ## Completed (implemented + tested)
 
@@ -39,13 +40,15 @@ so no real-QPU job and no live Claude API call has been made.
 | Agents | 10 roles, tool allow-lists, manual Claude tool-use loop (official SDK, `claude-opus-5-5`, explicit effort, server-side refusal fallback), delegation with depth limit, iteration/token/USD budgets, needs-input halt, approval-only hardware tool, usage & cost tracking | `tests/test_agents.py` (11), scripted fake client + real tools |
 | Persistence | SQLAlchemy 2 models (9 tables), Alembic migration `0001` **shipped inside the package** (`qopt/migrations`), SQLite default / PostgreSQL URL | migrations run in every API test and from an installed package |
 | API & security | JWT + hashed API keys, RBAC admin/researcher/viewer, bootstrap-once admin, login throttling, per-user & per-IP rate limits, upload limits, schema validation, job quotas & timeouts, approval workflow, audit log with secret redaction, security headers, structured JSON logs; production refuses missing or weak JWT secrets | `tests/test_api.py` (16), `tests/test_deployment.py` (6) |
-| Frontend | 24 pages wired to real endpoints, industry templates grouped by sector, execution-kind badges, SAMPLE data labelled | `tsc` clean, `vite build` OK; every page's API call exercised live |
+| Frontend | 24 pages wired to real endpoints, industry templates grouped by sector, execution-kind badges, SAMPLE data labelled, form labels linked with `htmlFor`/`id` | `tsc` clean, `vite build` OK; **32 Playwright browser E2E tests** against the real backend (below) |
+| Browser E2E | Playwright + Chromium against the real backend and production build: admin bootstrap via the UI, all 24 pages via the sidebar, every optimisation workflow (builder → validation → matrix/CSV → Ising → circuit/QASM → QAOA → simulator → classical → hybrid → industry → benchmark → report download → experiment history), RBAC for admin/researcher/viewer, API keys, datasets, research upload/search, agents-unavailable state, hardware approval reject + refused approve, admin config/audit, docs, sign-out, mobile layout. Any console error, uncaught exception, 5xx or unexpected 4xx fails a test | `frontend/e2e/`, 32/32 passed in two consecutive runs; CI job `e2e` |
 | Deployment | Dockerfile (installs the package, runs from `/app`, non-root, healthcheck), `.dockerignore`, docker-compose with PostgreSQL, `.env.example` covering every setting, GitHub Actions CI | installed-package runtime verified live, 12/12 checks (below); `docker build` not run here |
 
 ## Tests
 
-- **Passed:** backend `pytest` **161 / 161** (core 34, solvers 13, QAOA 23, industries/hybrid 36, industry
-  reference solvers 22, agents 11, API 16, deployment 6). Frontend `tsc` + `vite build` clean. Two live
+- **Passed:** backend `pytest` **162 / 162** (core 34, solvers 13, QAOA 23, industries/hybrid 36, industry
+  reference solvers 22, agents 11, API 17, deployment 6). **Browser E2E 32 / 32** (Playwright, Chromium; two
+  consecutive clean runs). Frontend `tsc` + `vite build` clean. Two live
   checks: the HTTP smoke test against a source-tree server (27/27), and the **installed-package** server in
   production mode started from outside the source tree, i.e. the Docker runtime layout (12/12: health,
   OpenAPI, SPA + assets, migrations, login, docs, all modules + samples, a background multi-echelon job, no
@@ -59,7 +62,13 @@ so no real-QPU job and no live Claude API call has been made.
   - an infeasible multi-echelon sample example (now caught by a DC-level check);
   - **installed deployments crashed at startup** (migrations and other paths resolved against a source tree that doesn't exist after install);
   - the Dockerfile copied a missing directory and had no `.dockerignore`;
-  - `.env.example` shipped a non-empty placeholder JWT secret.
+  - `.env.example` shipped a non-empty placeholder JWT secret;
+  - found by the browser E2E suite: jobs launched from the UI were never linked to their experiment, so the
+    experiment's job history stayed empty;
+  - also found by E2E: `experiment_id` inside job params skipped the ownership check, letting a researcher run jobs on
+    (and so read) another user's experiment (fixed and covered by an API test);
+  - also found by E2E: form controls were nested inside their `<label>`, so a select's accessible name included all
+    of its option text (labels are now linked with `htmlFor`/`id`).
 
 ## Not verified / known limitations
 
@@ -70,8 +79,9 @@ so no real-QPU job and no live Claude API call has been made.
 - **`docker build` / `docker compose up` and PostgreSQL not run.** Docker, WSL2 and PostgreSQL are not installed on
   this machine, and installing Docker Desktop needs WSL2/Hyper-V enabled with admin rights and a reboot. The
   runtime the image uses (installed package, production mode, same paths) is verified; CI builds the image.
-- **UI not clicked through in a browser** (the Chrome extension was not connected). Every endpoint each page uses
-  was exercised over HTTP and the UI compiles, but layout and interaction bugs may remain. There are no UI tests.
+- **Browser coverage:** the E2E suite runs Chromium only (no Firefox/WebKit runs) and checks behaviour, not visual
+  appearance (no screenshot comparison). Automated accessibility auditing (e.g. axe) is not included. The installed
+  Microsoft Edge crashed under automation after file downloads, so the suite uses Playwright's pinned Chromium.
 - Jobs run on an in-process thread pool and rate limits are in-process; Redis is not implemented → run a single API
   process. Running jobs cannot be interrupted (a timeout marks the status; late results are stored with `late=true`).
 - Statevector QAOA ≤ 22 qubits; exhaustive validation ≤ 20 decision variables. Slack-heavy examples (operating
@@ -119,7 +129,7 @@ so no real-QPU job and no live Claude API call has been made.
 1. On a Docker host: `docker compose up --build`, confirm the container is `healthy`, and run the suite against PostgreSQL.
 2. With credentials: a real IBM job end-to-end through the approval flow; Braket/D-Wave integration tests.
 3. With an API key: agent evaluations on the three natural-language example prompts; tune prompts and effort.
-4. Browser E2E tests (Playwright) for the 24 pages; code-split the bundle.
+4. Extend E2E to Firefox/WebKit, add axe accessibility checks and visual regression; code-split the bundle.
 5. Redis-backed job queue and rate limiting for multi-replica deployments; cooperative cancellation.
 6. Slack-free encodings for the slack-heavy modules so they fit simulator limits; lead times and plant capacity
    in multi-echelon replenishment; scenario-based (stochastic) renewable planning.

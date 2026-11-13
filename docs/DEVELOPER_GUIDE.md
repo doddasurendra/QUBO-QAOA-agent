@@ -33,6 +33,27 @@ cd ..\frontend; npm install; npm run dev                 # UI on :5173 (proxies 
 
 `npm run build` produces `frontend/dist`, which the backend serves automatically (single process).
 
+## Browser end-to-end tests (Playwright)
+
+```powershell
+cd frontend
+npx playwright install chromium     # once: Playwright's pinned Chromium
+npm run e2e                         # build the SPA, start the real backend on :8790 with a fresh DB, run 32 tests
+npm run e2e:only                    # re-run without rebuilding
+npx playwright show-report e2e\.report
+```
+
+`e2e/start-server.mjs` starts uvicorn from `backend/` with a throw-away SQLite DB (`e2e/.work`), real job threads,
+the production SPA build, and agents forced unavailable. `auth.setup.ts` bootstraps the admin **through the UI** and
+saves tokens; specs inject them into `sessionStorage`. The `problems` fixture fails any test on a browser console
+error, an uncaught exception, any 5xx, or a 4xx that the test did not explicitly allow. Specs:
+`01-navigation` (all 24 pages via the sidebar, deep links, overview), `02-workflows` (builder → validation → matrix →
+Ising → circuit + QASM → QAOA → simulator → classical → hybrid → industry → benchmark → reports → experiment history),
+`03-platform` (users/RBAC incl. viewer, API keys, datasets, research upload + search, agents unavailable, hardware
+approval reject + refused approve, admin config/audit, usage, docs, sign-out, mobile menu + no horizontal scroll).
+The active model is per browser tab, so each test selects it (`useExperiment`). Set `QOPT_PYTHON` if the venv is not
+at `<repo>/.venv`, and `PW_CHANNEL=msedge|chrome` to use an installed browser (Edge crashed after downloads here).
+
 ## Conventions you must not break
 
 See `docs/ARCHITECTURE.md §2`. Tests enforce: matrix conventions, the `x = (1 − z)/2` spin map,

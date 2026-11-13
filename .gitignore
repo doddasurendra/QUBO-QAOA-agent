@@ -12,3 +12,7 @@ frontend/dist/
 .DS_Store
 .claude/settings.local.json
 build/
+frontend/e2e/.auth/
+frontend/e2e/.results/
+frontend/e2e/.report/
+frontend/e2e/.work/
