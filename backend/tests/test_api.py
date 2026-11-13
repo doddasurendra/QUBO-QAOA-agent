@@ -183,4 +183,15 @@ def test_input_validation_errors(admin_client):
     assert api.post("/api/qubo/compile", json={}).status_code == 422
     assert api.post("/api/qubo/evaluate", json={"spec": SPEC, "bitstring": "10x"}).status_code == 422
     assert api.post("/api/industries/finance.portfolio/formulate", json={"data": {"assets": ["a"]}}).status_code == 422
-    assert api.get("/api/docs-content/..%2F..%2Fetc").status_code in (400, 404)
+    r = api.get("/api/docs-content/..%2F..%2Fetc")
+    assert r.status_code in (400, 404) and "json" in r.headers["content-type"]
+    assert api.get("/api/does-not-exist").status_code == 404
+
+
+def test_spa_fallback_does_not_serve_files_outside_dist(api):
+    from pathlib import Path
+    if not (Path(__file__).resolve().parents[2] / "frontend" / "dist").is_dir():
+        pytest.skip("frontend not built")
+    r = api.get("/..%2F..%2Fbackend%2Fpyproject.toml")
+    assert "[project]" not in r.text
+    assert '<div id="root">' in api.get("/some/client/route").text

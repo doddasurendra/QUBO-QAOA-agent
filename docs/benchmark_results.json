@@ -1,0 +1,2491 @@
+{
+ "generated_at": "2026-11-13T08:28:11.099291+00:00",
+ "qopt_version": "0.1.0",
+ "python": "3.12.0",
+ "platform": "Windows-10-10.0.19045-SP0",
+ "numpy": "2.5.4",
+ "config": {
+  "problems": [
+   "maxcut_gnp",
+   "maxcut_3regular",
+   "number_partitioning",
+   "knapsack"
+  ],
+  "sizes": [
+   6,
+   8,
+   10
+  ],
+  "seeds": 5,
+  "solvers": [
+   "simulated_annealing",
+   "tabu_search",
+   "greedy_descent",
+   "milp"
+  ],
+  "qaoa_depths": [
+   1,
+   2,
+   3
+  ],
+  "qaoa_shots": 1024
+ },
+ "definitions": {
+  "normalized_gap": "(E_found \u2212 E_opt) / (E_max \u2212 E_min); 0 = optimal",
+  "optimum_hit_rate": "fraction of seeds where the proven optimum was found",
+  "approximation_ratio": "(E_max \u2212 \u27e8H\u27e9) / (E_max \u2212 E_min) of the QAOA state",
+  "ground_state_probability": "\u03a3 |\u27e8z|\u03c8\u27e9|\u00b2 over optimal z"
+ },
+ "disclaimer": "Small instances, exact optima by enumeration. QAOA is simulated exactly (no noise). These results do not demonstrate quantum advantage.",
+ "rows": [
+  {
+   "problem": "maxcut_gnp",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "simulated_annealing",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.20428264001384377,
+    "std": 0.04418860966785889,
+    "min": 0.17282150010578334,
+    "max": 0.29121060005854815
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "tabu_search",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.19497867997270077,
+    "std": 0.0045899623216448,
+    "min": 0.19084089994430542,
+    "max": 0.20347840001340955
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "greedy_descent",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.0004051599884405732,
+    "std": 0.00013496491222149239,
+    "min": 0.00026110000908374786,
+    "max": 0.0006497999420389533
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "milp",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.018180500017479062,
+    "std": 0.007157248715039259,
+    "min": 0.004200999974273145,
+    "max": 0.024117300054058433
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "qaoa_p1",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.019956659991294146,
+    "std": 0.005415415811666521,
+    "min": 0.014361100038513541,
+    "max": 0.029831599909812212
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.7799720059921263,
+    "std": 0.04614191412805692,
+    "min": 0.7223984781161045,
+    "max": 0.8356263506067432
+   },
+   "ground_state_probability": {
+    "mean": 0.2174843418808341,
+    "std": 0.12764576585549703,
+    "min": 0.05292992801505259,
+    "max": 0.39661720368036496
+   },
+   "circuit_evaluations": {
+    "mean": 45.0,
+    "std": 5.019960159204453,
+    "min": 40,
+    "max": 51
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "qaoa_p2",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.03693120004609227,
+    "std": 0.0028920068209622577,
+    "min": 0.03301000001374632,
+    "max": 0.041102100047282875
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.8677202780437463,
+    "std": 0.026323968325119084,
+    "min": 0.8391474095390774,
+    "max": 0.9169588077183803
+   },
+   "ground_state_probability": {
+    "mean": 0.34960600213378823,
+    "std": 0.18237493089736065,
+    "min": 0.13122062337277593,
+    "max": 0.657435060223674
+   },
+   "circuit_evaluations": {
+    "mean": 64.4,
+    "std": 7.964923100695951,
+    "min": 53,
+    "max": 75
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "qaoa_p3",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.11620138003490865,
+    "std": 0.03129619459969111,
+    "min": 0.07288510003127158,
+    "max": 0.15640790003817528
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.8980962691493891,
+    "std": 0.05253469512598481,
+    "min": 0.8420650446979635,
+    "max": 0.9603699153816463
+   },
+   "ground_state_probability": {
+    "mean": 0.4759069727572597,
+    "std": 0.3193435736441521,
+    "min": 0.1413712164032647,
+    "max": 0.883764836127108
+   },
+   "circuit_evaluations": {
+    "mean": 139.6,
+    "std": 38.676090805560996,
+    "min": 83,
+    "max": 185
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "simulated_annealing",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.2673163800267503,
+    "std": 0.024713138198240916,
+    "min": 0.23616560001391917,
+    "max": 0.31001400004606694
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "tabu_search",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.2417082600062713,
+    "std": 0.06845954461673028,
+    "min": 0.19111270003486425,
+    "max": 0.3758129000198096
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "greedy_descent",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.00037210001610219476,
+    "std": 4.397560396129619e-05,
+    "min": 0.00032079999800771475,
+    "max": 0.00045190006494522095
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "milp",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.04680808000266552,
+    "std": 0.04740502078557317,
+    "min": 0.016572399996221066,
+    "max": 0.14024390000849962
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "qaoa_p1",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.03229308002628386,
+    "std": 0.008198155325922841,
+    "min": 0.020781900035217404,
+    "max": 0.04138470010366291
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.7422948597017734,
+    "std": 0.09984727502322031,
+    "min": 0.5675706724233702,
+    "max": 0.8395513090780817
+   },
+   "ground_state_probability": {
+    "mean": 0.14379573085431963,
+    "std": 0.14813065309721588,
+    "min": 0.0011678013116779187,
+    "max": 0.3698385922901174
+   },
+   "circuit_evaluations": {
+    "mean": 41.2,
+    "std": 6.734983296193095,
+    "min": 32,
+    "max": 47
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "qaoa_p2",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.07170371999964117,
+    "std": 0.01252802758339314,
+    "min": 0.05548280000220984,
+    "max": 0.09167390002403408
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.8859018653361959,
+    "std": 0.061070422848876586,
+    "min": 0.7667687982325276,
+    "max": 0.930997467367949
+   },
+   "ground_state_probability": {
+    "mean": 0.46309934654259655,
+    "std": 0.14956599860969605,
+    "min": 0.2707825256510692,
+    "max": 0.7145308323401859
+   },
+   "circuit_evaluations": {
+    "mean": 71.0,
+    "std": 13.72588794941879,
+    "min": 48,
+    "max": 89
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "qaoa_p3",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.1918364000041038,
+    "std": 0.047934761331439826,
+    "min": 0.14022389997262508,
+    "max": 0.2760757999494672
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.9026994905957041,
+    "std": 0.03575515222543871,
+    "min": 0.8501585117260082,
+    "max": 0.9479122722909722
+   },
+   "ground_state_probability": {
+    "mean": 0.513695903397689,
+    "std": 0.12773496661688272,
+    "min": 0.26680076490884175,
+    "max": 0.6127718145989054
+   },
+   "circuit_evaluations": {
+    "mean": 145.0,
+    "std": 43.03951672591132,
+    "min": 111,
+    "max": 227
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "simulated_annealing",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.3604162400122732,
+    "std": 0.06702710533896146,
+    "min": 0.3005785000277683,
+    "max": 0.4693334000185132
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "tabu_search",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.25494399999734013,
+    "std": 0.10169286014400446,
+    "min": 0.2014396000886336,
+    "max": 0.4583072999957949
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "greedy_descent",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.0006453200243413448,
+    "std": 0.00019761365993116806,
+    "min": 0.0004005000228062272,
+    "max": 0.0008715000003576279
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "milp",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.08621982003096491,
+    "std": 0.07744931919293194,
+    "min": 0.017608700087293983,
+    "max": 0.19301070005167276
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "qaoa_p1",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.05722058003302664,
+    "std": 0.013331891509781193,
+    "min": 0.04726450005546212,
+    "max": 0.08201120002195239
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.7573607415491698,
+    "std": 0.03280322605610594,
+    "min": 0.7051886735987528,
+    "max": 0.8006654588040047
+   },
+   "ground_state_probability": {
+    "mean": 0.03032088016662275,
+    "std": 0.021987564300769362,
+    "min": 0.002462398873484967,
+    "max": 0.05988413134792184
+   },
+   "circuit_evaluations": {
+    "mean": 39.8,
+    "std": 1.9390719429665315,
+    "min": 37,
+    "max": 42
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "qaoa_p2",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.18795340000651778,
+    "std": 0.09575508861402006,
+    "min": 0.10749349999241531,
+    "max": 0.3713420999702066
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.8581239583063107,
+    "std": 0.03296976908034954,
+    "min": 0.8157713199743688,
+    "max": 0.8977540067900657
+   },
+   "ground_state_probability": {
+    "mean": 0.14312009932585273,
+    "std": 0.06410035693453525,
+    "min": 0.05359147000095846,
+    "max": 0.1995967700716896
+   },
+   "circuit_evaluations": {
+    "mean": 89.4,
+    "std": 20.313542280951395,
+    "min": 63,
+    "max": 116
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "maxcut_gnp",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "qaoa_p3",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.34640627996996043,
+    "std": 0.03287810402943338,
+    "min": 0.30540329997893423,
+    "max": 0.40292959997896105
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.860174881288301,
+    "std": 0.042185540848540606,
+    "min": 0.7815614889656133,
+    "max": 0.8978291402948149
+   },
+   "ground_state_probability": {
+    "mean": 0.14314158400345334,
+    "std": 0.07779435884431736,
+    "min": 0.029509827297930846,
+    "max": 0.25571417563841836
+   },
+   "circuit_evaluations": {
+    "mean": 137.8,
+    "std": 27.095387061269303,
+    "min": 93,
+    "max": 178
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "simulated_annealing",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.22925300002098084,
+    "std": 0.08720787057871447,
+    "min": 0.1747932001017034,
+    "max": 0.4030191000783816
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "tabu_search",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.23215351998806,
+    "std": 0.03865847818838768,
+    "min": 0.19814059999771416,
+    "max": 0.3021562999347225
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "greedy_descent",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.00044576001819223164,
+    "std": 7.679355763893773e-05,
+    "min": 0.00030890002381056547,
+    "max": 0.0005382000235840678
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "milp",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.017764160013757645,
+    "std": 0.00483776049989666,
+    "min": 0.014006100012920797,
+    "max": 0.027331799967214465
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "qaoa_p1",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.020012539997696876,
+    "std": 0.0037149651694557144,
+    "min": 0.013420699979178607,
+    "max": 0.023587399977259338
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.8172582999623831,
+    "std": 0.06240410511626088,
+    "min": 0.6924500897298613,
+    "max": 0.8484603525205137
+   },
+   "ground_state_probability": {
+    "mean": 0.38749340521325004,
+    "std": 0.026645580713680266,
+    "min": 0.3342022437858895,
+    "max": 0.40081619557009024
+   },
+   "circuit_evaluations": {
+    "mean": 46.6,
+    "std": 5.71314274283428,
+    "min": 38,
+    "max": 55
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "qaoa_p2",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.04092295998707414,
+    "std": 0.008507233845130231,
+    "min": 0.025094399927183986,
+    "max": 0.049090499989688396
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.9328395595802949,
+    "std": 0.02087770514245234,
+    "min": 0.8910841492953901,
+    "max": 0.9432784121515211
+   },
+   "ground_state_probability": {
+    "mean": 0.7290113047033279,
+    "std": 0.016187574687456983,
+    "min": 0.7209175173595991,
+    "max": 0.7613864540782418
+   },
+   "circuit_evaluations": {
+    "mean": 65.8,
+    "std": 11.408768557561329,
+    "min": 47,
+    "max": 80
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "qaoa_p3",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.1242280599894002,
+    "std": 0.010854359825086058,
+    "min": 0.1063394999364391,
+    "max": 0.1360319999512285
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.9431445199309341,
+    "std": 0.016828523436461983,
+    "min": 0.9177470445495306,
+    "max": 0.9627106917102863
+   },
+   "ground_state_probability": {
+    "mean": 0.7331293126726613,
+    "std": 0.10585239978145741,
+    "min": 0.6263787778692851,
+    "max": 0.9236130223844413
+   },
+   "circuit_evaluations": {
+    "mean": 148.0,
+    "std": 12.13260071048248,
+    "min": 134,
+    "max": 168
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "simulated_annealing",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.2509641999844462,
+    "std": 0.0075665837603490224,
+    "min": 0.24039729998912662,
+    "max": 0.2592951999977231
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "tabu_search",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.20475604000966996,
+    "std": 0.01616176984054672,
+    "min": 0.1916065999539569,
+    "max": 0.2359065000200644
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "greedy_descent",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.00044526003766804935,
+    "std": 5.5853962014041476e-05,
+    "min": 0.0003980000037699938,
+    "max": 0.0005508000031113625
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "milp",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.07693040003068745,
+    "std": 0.10029981943408271,
+    "min": 0.01604310004040599,
+    "max": 0.27719459997024387
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "qaoa_p1",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.027847860031761228,
+    "std": 0.0018148131291300356,
+    "min": 0.025032200035639107,
+    "max": 0.030674500041641295
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.8035659270716868,
+    "std": 0.0057476145897520595,
+    "min": 0.8006921197768108,
+    "max": 0.8150611562511909
+   },
+   "ground_state_probability": {
+    "mean": 0.16057197737459303,
+    "std": 0.03574218714710921,
+    "min": 0.1427008838010384,
+    "max": 0.23205635166881144
+   },
+   "circuit_evaluations": {
+    "mean": 47.6,
+    "std": 4.6303347611160905,
+    "min": 42,
+    "max": 56
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "qaoa_p2",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.06647546000313014,
+    "std": 0.01922689082405463,
+    "min": 0.04230299999471754,
+    "max": 0.09004979999735951
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.8824847202339974,
+    "std": 0.008120503556515345,
+    "min": 0.8784244684557396,
+    "max": 0.898725727347028
+   },
+   "ground_state_probability": {
+    "mean": 0.3555003203090287,
+    "std": 0.012257771892087228,
+    "min": 0.3493714343629848,
+    "max": 0.3800158640932031
+   },
+   "circuit_evaluations": {
+    "mean": 64.8,
+    "std": 19.456618411224497,
+    "min": 44,
+    "max": 100
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "qaoa_p3",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.26189477995503696,
+    "std": 0.05700615093739033,
+    "min": 0.18063419999089092,
+    "max": 0.33917129994370043
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.923021144913305,
+    "std": 0.016128926238481528,
+    "min": 0.9102345943732114,
+    "max": 0.9483039312263621
+   },
+   "ground_state_probability": {
+    "mean": 0.5370097187534875,
+    "std": 0.07408588579308932,
+    "min": 0.476770812738967,
+    "max": 0.6380586291165762
+   },
+   "circuit_evaluations": {
+    "mean": 205.2,
+    "std": 45.538555093458996,
+    "min": 143,
+    "max": 267
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "simulated_annealing",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.31421537999995053,
+    "std": 0.0467473723504385,
+    "min": 0.2856385000050068,
+    "max": 0.40676599997095764
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "tabu_search",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.1945843000197783,
+    "std": 0.00435900557079853,
+    "min": 0.18780219997279346,
+    "max": 0.20087040006183088
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "greedy_descent",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.0005319799762219191,
+    "std": 8.324932715856832e-05,
+    "min": 0.0003893999382853508,
+    "max": 0.0006388999754562974
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "milp",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.017436580010689796,
+    "std": 0.005310837062022511,
+    "min": 0.014469100045971572,
+    "max": 0.028019699966534972
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "qaoa_p1",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.04804727998562157,
+    "std": 0.003018971049304926,
+    "min": 0.04522900003939867,
+    "max": 0.053574200021103024
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.7910058989201596,
+    "std": 0.01743363313467113,
+    "min": 0.7647523404469573,
+    "max": 0.8180023390353378
+   },
+   "ground_state_probability": {
+    "mean": 0.08518890766303303,
+    "std": 0.03896282664315924,
+    "min": 0.03583698835334351,
+    "max": 0.13204064545066
+   },
+   "circuit_evaluations": {
+    "mean": 45.2,
+    "std": 2.3151673805580453,
+    "min": 43,
+    "max": 48
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "qaoa_p2",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.11691763999406249,
+    "std": 0.025734734045398087,
+    "min": 0.07390019996091723,
+    "max": 0.1477250000461936
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.8710336644064262,
+    "std": 0.02081674429285967,
+    "min": 0.8360361012478386,
+    "max": 0.8925532938487174
+   },
+   "ground_state_probability": {
+    "mean": 0.23763850531654868,
+    "std": 0.07021932176092692,
+    "min": 0.1309787823863413,
+    "max": 0.326651877346833
+   },
+   "circuit_evaluations": {
+    "mean": 69.8,
+    "std": 13.991425945914163,
+    "min": 46,
+    "max": 86
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "maxcut_3regular",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "qaoa_p3",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.4099684400251135,
+    "std": 0.07333700564378955,
+    "min": 0.3321521000470966,
+    "max": 0.5371792999794707
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.9080319121824012,
+    "std": 0.02512731899778228,
+    "min": 0.8728069862129477,
+    "max": 0.9390248726144925
+   },
+   "ground_state_probability": {
+    "mean": 0.3720217177413688,
+    "std": 0.10644881270426731,
+    "min": 0.24917680889740268,
+    "max": 0.5283434390696652
+   },
+   "circuit_evaluations": {
+    "mean": 177.0,
+    "std": 33.85262175962151,
+    "min": 136,
+    "max": 234
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "simulated_annealing",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.18179095995146782,
+    "std": 0.01373651125678647,
+    "min": 0.16180769994389266,
+    "max": 0.20092099998146296
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "tabu_search",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.2008690399583429,
+    "std": 0.003950445776187947,
+    "min": 0.19544439995661378,
+    "max": 0.2064871999900788
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "greedy_descent",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.0005412599770352244,
+    "std": 0.0003969564695622322,
+    "min": 0.0003076000139117241,
+    "max": 0.0013334999093785882
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "milp",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.042426319979131225,
+    "std": 0.0047823844957082615,
+    "min": 0.03332219994626939,
+    "max": 0.04647449997719377
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "qaoa_p1",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.018458779994398357,
+    "std": 0.003949051687118161,
+    "min": 0.013954799971543252,
+    "max": 0.025764900026842952
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.9366276109166186,
+    "std": 0.009608385124541827,
+    "min": 0.9265569034836204,
+    "max": 0.9548157566122538
+   },
+   "ground_state_probability": {
+    "mean": 0.1240185836158177,
+    "std": 0.03836964330090425,
+    "min": 0.06181470865046786,
+    "max": 0.1825988067349002
+   },
+   "circuit_evaluations": {
+    "mean": 46.0,
+    "std": 7.155417527999327,
+    "min": 35,
+    "max": 57
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "qaoa_p2",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.05113500000443309,
+    "std": 0.008081052488792198,
+    "min": 0.04250079998746514,
+    "max": 0.06131589994765818
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.9454686256306349,
+    "std": 0.03587074718596813,
+    "min": 0.8746809133063773,
+    "max": 0.9738243735451181
+   },
+   "ground_state_probability": {
+    "mean": 0.13475075039682877,
+    "std": 0.07132931074014072,
+    "min": 0.010706244716067665,
+    "max": 0.22634812470238824
+   },
+   "circuit_evaluations": {
+    "mean": 82.6,
+    "std": 10.57544325312183,
+    "min": 70,
+    "max": 102
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 6,
+   "qubo_variables": 6,
+   "solver": "qaoa_p3",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.14821323999203742,
+    "std": 0.06975163295552556,
+    "min": 0.08245159999933094,
+    "max": 0.26964710000902414
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.9640668932780436,
+    "std": 0.014235332095723804,
+    "min": 0.935957396793958,
+    "max": 0.975463369135893
+   },
+   "ground_state_probability": {
+    "mean": 0.14912785490000807,
+    "std": 0.0650507850209811,
+    "min": 0.07219976847727921,
+    "max": 0.25471239496874737
+   },
+   "circuit_evaluations": {
+    "mean": 155.4,
+    "std": 50.313417693494046,
+    "min": 97,
+    "max": 231
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "simulated_annealing",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.23861042000353336,
+    "std": 0.013853893490559377,
+    "min": 0.21956769993994385,
+    "max": 0.2569702999899164
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "tabu_search",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.22327193999662995,
+    "std": 0.04592514002892859,
+    "min": 0.19015120004769415,
+    "max": 0.3140822999412194
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "greedy_descent",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.0003736599814146757,
+    "std": 3.1663849678819144e-05,
+    "min": 0.00031619996298104525,
+    "max": 0.0004121999954804778
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "milp",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.07458652001805603,
+    "std": 0.018446515945721154,
+    "min": 0.038106199936009943,
+    "max": 0.0871250000782311
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "qaoa_p1",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.03659358001314104,
+    "std": 0.005655722232965537,
+    "min": 0.02964069996960461,
+    "max": 0.04692740004975349
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.9520410387331658,
+    "std": 0.008621091577249159,
+    "min": 0.938526244440564,
+    "max": 0.9651260373753763
+   },
+   "ground_state_probability": {
+    "mean": 0.06039240946063311,
+    "std": 0.04226507131597605,
+    "min": 0.030681386486984062,
+    "max": 0.14148373256041477
+   },
+   "circuit_evaluations": {
+    "mean": 57.2,
+    "std": 11.77115117564973,
+    "min": 45,
+    "max": 79
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "qaoa_p2",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.08091593999415636,
+    "std": 0.020733210356956727,
+    "min": 0.05589930003043264,
+    "max": 0.10942550003528595
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.9344716849886116,
+    "std": 0.04631203321823943,
+    "min": 0.8729079776638892,
+    "max": 0.9738054084573127
+   },
+   "ground_state_probability": {
+    "mean": 0.06803172812269999,
+    "std": 0.05444696204938395,
+    "min": 0.019435899423714466,
+    "max": 0.16857593036134152
+   },
+   "circuit_evaluations": {
+    "mean": 84.8,
+    "std": 23.78570999570961,
+    "min": 63,
+    "max": 118
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 8,
+   "qubo_variables": 8,
+   "solver": "qaoa_p3",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.20423971996642648,
+    "std": 0.03871734620349853,
+    "min": 0.15623399999458343,
+    "max": 0.258624600013718
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.9525182754012844,
+    "std": 0.035835277786582985,
+    "min": 0.8873747276106281,
+    "max": 0.9837488088483567
+   },
+   "ground_state_probability": {
+    "mean": 0.0738628804071519,
+    "std": 0.0655991860327678,
+    "min": 0.02865248187824765,
+    "max": 0.2043243375071325
+   },
+   "circuit_evaluations": {
+    "mean": 160.0,
+    "std": 27.2176413379264,
+    "min": 123,
+    "max": 187
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "simulated_annealing",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.2810016800183803,
+    "std": 0.012931097683622175,
+    "min": 0.26678840001113713,
+    "max": 0.29618920001666993
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "tabu_search",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.2028577200137079,
+    "std": 0.004673141395954438,
+    "min": 0.1957924000453204,
+    "max": 0.20783110009506345
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "greedy_descent",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.0006622199667617679,
+    "std": 0.000337717059161935,
+    "min": 0.00035639991983771324,
+    "max": 0.0011705999495461583
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "milp",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.15925717998761685,
+    "std": 0.052722586829184785,
+    "min": 0.1098352000117302,
+    "max": 0.2581339000025764
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "qaoa_p1",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.07586250002495945,
+    "std": 0.008207366557356632,
+    "min": 0.06033869995735586,
+    "max": 0.08386030001565814
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.9631053446672307,
+    "std": 0.007442772844748404,
+    "min": 0.9538831479853833,
+    "max": 0.9744701998591176
+   },
+   "ground_state_probability": {
+    "mean": 0.0661212392483064,
+    "std": 0.03458957467976738,
+    "min": 0.03136607149736757,
+    "max": 0.13033184589769958
+   },
+   "circuit_evaluations": {
+    "mean": 59.0,
+    "std": 7.6681158050723255,
+    "min": 45,
+    "max": 68
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "qaoa_p2",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.21109920002054422,
+    "std": 0.06065230950237458,
+    "min": 0.12752990005537868,
+    "max": 0.2853787000058219
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.9587729167654718,
+    "std": 0.036316275026385736,
+    "min": 0.8863255951478587,
+    "max": 0.9799622378480547
+   },
+   "ground_state_probability": {
+    "mean": 0.07867686671721205,
+    "std": 0.050165706783457706,
+    "min": 0.013973306977677437,
+    "max": 0.165613600308726
+   },
+   "circuit_evaluations": {
+    "mean": 112.0,
+    "std": 24.714368290530917,
+    "min": 73,
+    "max": 138
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "number_partitioning",
+   "n": 10,
+   "qubo_variables": 10,
+   "solver": "qaoa_p3",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.3128011000342667,
+    "std": 0.044298257998117936,
+    "min": 0.23843959998339415,
+    "max": 0.3773835999891162
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.9051445007408635,
+    "std": 0.034258943298619865,
+    "min": 0.871168859889039,
+    "max": 0.9685806828518361
+   },
+   "ground_state_probability": {
+    "mean": 0.07021584234813362,
+    "std": 0.07392119152458554,
+    "min": 0.007666166947618028,
+    "max": 0.2150382547191851
+   },
+   "circuit_evaluations": {
+    "mean": 124.2,
+    "std": 23.574562562219473,
+    "min": 101,
+    "max": 161
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "knapsack",
+   "n": 6,
+   "qubo_variables": 11,
+   "solver": "simulated_annealing",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.2890173200052232,
+    "std": 0.01085148482441871,
+    "min": 0.2768361000344157,
+    "max": 0.3062597999814898
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "knapsack",
+   "n": 6,
+   "qubo_variables": 11,
+   "solver": "tabu_search",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.20923703999724239,
+    "std": 0.007315961757819092,
+    "min": 0.19728580000810325,
+    "max": 0.21879850002005696
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "knapsack",
+   "n": 6,
+   "qubo_variables": 11,
+   "solver": "greedy_descent",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 1.474180776682672e-05,
+    "std": 2.948361553365344e-05,
+    "min": 0.0,
+    "max": 7.37090388341336e-05
+   },
+   "runtime_s": {
+    "mean": 0.00044001995120197536,
+    "std": 6.317891083737269e-05,
+    "min": 0.00033909990452229977,
+    "max": 0.0005273999413475394
+   },
+   "optimum_hit_rate": 0.8,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "knapsack",
+   "n": 6,
+   "qubo_variables": 11,
+   "solver": "milp",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.14417803999967874,
+    "std": 0.035684696551014916,
+    "min": 0.1085309999762103,
+    "max": 0.21234379999805242
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "knapsack",
+   "n": 6,
+   "qubo_variables": 11,
+   "solver": "qaoa_p1",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.08260200000368059,
+    "std": 0.019137220987707076,
+    "min": 0.06270040001254529,
+    "max": 0.11828930000774562
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.9692892643647111,
+    "std": 0.005319692963357237,
+    "min": 0.9615249915295468,
+    "max": 0.9780917016155843
+   },
+   "ground_state_probability": {
+    "mean": 0.0033774901134257323,
+    "std": 0.0008443850071822912,
+    "min": 0.002450666147209768,
+    "max": 0.004849101096959436
+   },
+   "circuit_evaluations": {
+    "mean": 60.6,
+    "std": 6.248199740725323,
+    "min": 54,
+    "max": 72
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "knapsack",
+   "n": 6,
+   "qubo_variables": 11,
+   "solver": "qaoa_p2",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.18441105999518187,
+    "std": 0.057668020076350295,
+    "min": 0.13278450001962483,
+    "max": 0.285848299972713
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.981020535047722,
+    "std": 0.002407187335256226,
+    "min": 0.977878300991419,
+    "max": 0.9853207135642138
+   },
+   "ground_state_probability": {
+    "mean": 0.004285601941602552,
+    "std": 0.0012242386991413781,
+    "min": 0.0030138612294351884,
+    "max": 0.006502767373675141
+   },
+   "circuit_evaluations": {
+    "mean": 89.8,
+    "std": 12.687001221722964,
+    "min": 75,
+    "max": 112
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "knapsack",
+   "n": 6,
+   "qubo_variables": 11,
+   "solver": "qaoa_p3",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.4260777199873701,
+    "std": 0.11962184399293066,
+    "min": 0.2804187999572605,
+    "max": 0.594629600062035
+   },
+   "optimum_hit_rate": 1.0,
+   "approximation_ratio": {
+    "mean": 0.9879761918080116,
+    "std": 0.002470595497644269,
+    "min": 0.9844589494165189,
+    "max": 0.9922109035608577
+   },
+   "ground_state_probability": {
+    "mean": 0.005780133915760833,
+    "std": 0.0018164543465111966,
+    "min": 0.004426277769402793,
+    "max": 0.009137276220357388
+   },
+   "circuit_evaluations": {
+    "mean": 170.6,
+    "std": 41.24851512478964,
+    "min": 127,
+    "max": 249
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "knapsack",
+   "n": 8,
+   "qubo_variables": 13,
+   "solver": "simulated_annealing",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.37180224000476303,
+    "std": 0.029408720312050565,
+    "min": 0.3398601000662893,
+    "max": 0.41280129994265735
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "knapsack",
+   "n": 8,
+   "qubo_variables": 13,
+   "solver": "tabu_search",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 4.8370468237688334e-05,
+    "std": 6.976429561814233e-05,
+    "min": 0.0,
+    "max": 0.00018636103456997193
+   },
+   "runtime_s": {
+    "mean": 0.20519307998474687,
+    "std": 0.00922009428168407,
+    "min": 0.1896496000699699,
+    "max": 0.21565579995512962
+   },
+   "optimum_hit_rate": 0.2,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "knapsack",
+   "n": 8,
+   "qubo_variables": 13,
+   "solver": "greedy_descent",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 9.383737996923249e-05,
+    "std": 8.077939277361609e-05,
+    "min": 3.078359644757297e-05,
+    "max": 0.00023960704444710675
+   },
+   "runtime_s": {
+    "mean": 0.00047933997120708227,
+    "std": 2.5025481009116786e-05,
+    "min": 0.00045549997594207525,
+    "max": 0.000510399928316474
+   },
+   "optimum_hit_rate": 0.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "knapsack",
+   "n": 8,
+   "qubo_variables": 13,
+   "solver": "milp",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 0.31429033998865635,
+    "std": 0.08203229630013835,
+    "min": 0.20388230006210506,
+    "max": 0.41892580001149327
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "knapsack",
+   "n": 8,
+   "qubo_variables": 13,
+   "solver": "qaoa_p1",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 1.4287999447890856e-05,
+    "std": 1.7700995058596674e-05,
+    "min": 0.0,
+    "max": 3.993450740785112e-05
+   },
+   "runtime_s": {
+    "mean": 0.1967481599887833,
+    "std": 0.04926900174987295,
+    "min": 0.1265325000276789,
+    "max": 0.26002159994095564
+   },
+   "optimum_hit_rate": 0.6,
+   "approximation_ratio": {
+    "mean": 0.9770266434973903,
+    "std": 0.0033990728379908195,
+    "min": 0.9733518670776293,
+    "max": 0.9825748172016873
+   },
+   "ground_state_probability": {
+    "mean": 0.0007190974392571169,
+    "std": 9.820028067560997e-05,
+    "min": 0.000542500197756212,
+    "max": 0.0008195655893286238
+   },
+   "circuit_evaluations": {
+    "mean": 54.6,
+    "std": 6.086049621881176,
+    "min": 43,
+    "max": 59
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "knapsack",
+   "n": 8,
+   "qubo_variables": 13,
+   "solver": "qaoa_p2",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 2.205384288212221e-05,
+    "std": 4.410768576424442e-05,
+    "min": 0.0,
+    "max": 0.00011026921441061105
+   },
+   "runtime_s": {
+    "mean": 0.5103308799909427,
+    "std": 0.21577574351117249,
+    "min": 0.28107809997163713,
+    "max": 0.813212199951522
+   },
+   "optimum_hit_rate": 0.8,
+   "approximation_ratio": {
+    "mean": 0.9860438225574091,
+    "std": 0.001481342615356914,
+    "min": 0.9835763178074217,
+    "max": 0.9879942315222073
+   },
+   "ground_state_probability": {
+    "mean": 0.0009022819731785998,
+    "std": 0.00018582347764397588,
+    "min": 0.0006615537203203863,
+    "max": 0.0012125862012936158
+   },
+   "circuit_evaluations": {
+    "mean": 90.0,
+    "std": 18.601075237738275,
+    "min": 68,
+    "max": 117
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "knapsack",
+   "n": 8,
+   "qubo_variables": 13,
+   "solver": "qaoa_p3",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 5.324600987713483e-06,
+    "std": 1.0649201975426966e-05,
+    "min": 0.0,
+    "max": 2.6623004938567417e-05
+   },
+   "runtime_s": {
+    "mean": 1.2853879800299182,
+    "std": 0.49619448292790613,
+    "min": 0.6725704999407753,
+    "max": 2.191563899978064
+   },
+   "optimum_hit_rate": 0.8,
+   "approximation_ratio": {
+    "mean": 0.9915678106063763,
+    "std": 0.001615781856556045,
+    "min": 0.9895216721778005,
+    "max": 0.9940389238324829
+   },
+   "ground_state_probability": {
+    "mean": 0.0013197984593040974,
+    "std": 0.0002115756212158049,
+    "min": 0.000980853128186429,
+    "max": 0.001637455919101511
+   },
+   "circuit_evaluations": {
+    "mean": 172.6,
+    "std": 44.029989779694475,
+    "min": 117,
+    "max": 214
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "knapsack",
+   "n": 10,
+   "qubo_variables": 15,
+   "solver": "simulated_annealing",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 1.3523107610128807e-06,
+    "std": 2.7046215220257615e-06,
+    "min": 0.0,
+    "max": 6.761553805064404e-06
+   },
+   "runtime_s": {
+    "mean": 0.517627920024097,
+    "std": 0.20480641124180765,
+    "min": 0.39530140010174364,
+    "max": 0.9262204000260681
+   },
+   "optimum_hit_rate": 0.8,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "knapsack",
+   "n": 10,
+   "qubo_variables": 15,
+   "solver": "tabu_search",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 5.278135723684363e-05,
+    "std": 3.7227434115134785e-05,
+    "min": 2.737738354345475e-06,
+    "max": 0.00011460482173740909
+   },
+   "runtime_s": {
+    "mean": 0.24641666000243276,
+    "std": 0.056967709533272015,
+    "min": 0.1895037000067532,
+    "max": 0.33236529992427677
+   },
+   "optimum_hit_rate": 0.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "knapsack",
+   "n": 10,
+   "qubo_variables": 15,
+   "solver": "greedy_descent",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 6.97256821091711e-05,
+    "std": 3.976190764669677e-05,
+    "min": 2.737738354345475e-06,
+    "max": 0.0001250234418953554
+   },
+   "runtime_s": {
+    "mean": 0.0005773399956524372,
+    "std": 0.00013454461590793824,
+    "min": 0.00046419992577284575,
+    "max": 0.0008321000495925546
+   },
+   "optimum_hit_rate": 0.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "knapsack",
+   "n": 10,
+   "qubo_variables": 15,
+   "solver": "milp",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0
+   },
+   "runtime_s": {
+    "mean": 1.2405853000236675,
+    "std": 0.3358341929355431,
+    "min": 0.6775213000364602,
+    "max": 1.7231802000897005
+   },
+   "optimum_hit_rate": 1.0,
+   "execution_kind": "classical"
+  },
+  {
+   "problem": "knapsack",
+   "n": 10,
+   "qubo_variables": 15,
+   "solver": "qaoa_p1",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 3.983582463471232e-06,
+    "std": 4.059970958881902e-06,
+    "min": 0.0,
+    "max": 1.0418620157946281e-05
+   },
+   "runtime_s": {
+    "mean": 0.8533496400108561,
+    "std": 0.2514814358718439,
+    "min": 0.4593944000080228,
+    "max": 1.186087999958545
+   },
+   "optimum_hit_rate": 0.4,
+   "approximation_ratio": {
+    "mean": 0.9806770686490344,
+    "std": 0.0030588836141077994,
+    "min": 0.9771502826358532,
+    "max": 0.9848660232294184
+   },
+   "ground_state_probability": {
+    "mean": 0.00014175724376359078,
+    "std": 3.275220430533463e-05,
+    "min": 8.93550436735221e-05,
+    "max": 0.0001901267103619795
+   },
+   "circuit_evaluations": {
+    "mean": 52.4,
+    "std": 4.5431266766402185,
+    "min": 46,
+    "max": 59
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "knapsack",
+   "n": 10,
+   "qubo_variables": 15,
+   "solver": "qaoa_p2",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 2.1055534079493424e-05,
+    "std": 9.224021954435525e-06,
+    "min": 1.09509534173819e-05,
+    "max": 3.2985882042485813e-05
+   },
+   "runtime_s": {
+    "mean": 3.4196098800282924,
+    "std": 1.0334316249130813,
+    "min": 2.0512889000819996,
+    "max": 4.37952309998218
+   },
+   "optimum_hit_rate": 0.0,
+   "approximation_ratio": {
+    "mean": 0.9895491168130869,
+    "std": 0.0019642896100591015,
+    "min": 0.9869599216388033,
+    "max": 0.9922350595195606
+   },
+   "ground_state_probability": {
+    "mean": 0.0001833049821146723,
+    "std": 7.533899280413587e-05,
+    "min": 4.2185543764262225e-05,
+    "max": 0.0002680452377622949
+   },
+   "circuit_evaluations": {
+    "mean": 108.2,
+    "std": 23.21551205552012,
+    "min": 72,
+    "max": 141
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  },
+  {
+   "problem": "knapsack",
+   "n": 10,
+   "qubo_variables": 15,
+   "solver": "qaoa_p3",
+   "seeds": 5,
+   "normalized_gap": {
+    "mean": 1.887399203827887e-05,
+    "std": 1.7809285351732408e-05,
+    "min": 0.0,
+    "max": 5.209310078973141e-05
+   },
+   "runtime_s": {
+    "mean": 6.815273440023884,
+    "std": 2.197997822527781,
+    "min": 3.775694200070575,
+    "max": 9.710007900022902
+   },
+   "optimum_hit_rate": 0.2,
+   "approximation_ratio": {
+    "mean": 0.9933932828964306,
+    "std": 0.0013154985959989251,
+    "min": 0.9917463433160182,
+    "max": 0.9950534641798631
+   },
+   "ground_state_probability": {
+    "mean": 0.0002659061542204119,
+    "std": 6.264263255698065e-05,
+    "min": 0.0001794750902415573,
+    "max": 0.0003709762185511391
+   },
+   "circuit_evaluations": {
+    "mean": 171.6,
+    "std": 30.819474362811576,
+    "min": 120,
+    "max": 216
+   },
+   "shots": 1024,
+   "execution_kind": "statevector_simulator"
+  }
+ ],
+ "total_runtime_s": 127.6565447000321
+}

@@ -105,4 +105,20 @@ def to_markdown(rep: dict) -> str:
                      f"{r['optimum_hit_rate']:.2f} | {g['mean']:.4f}±{g['std']:.4f} | {r['runtime_s']['mean']:.4f} | "
                      f"{'' if ar is None else f'{ar['mean']:.3f}'} | {'' if gp is None else f'{gp['mean']:.3f}'} |")
     lines += ["", "## Definitions", ""] + [f"- **{k}**: {v}" for k, v in rep["definitions"].items()]
+    shots = rep["config"].get("qaoa_shots")
+    lines += ["", "## How to read these numbers", "",
+              f"- **QAOA hit rate is not evidence of quantum performance at these sizes.** With {shots} shots and "
+              "n ≤ 10 (≤ 1024 basis states) sampling covers a large fraction of the whole state space, so even a "
+              "uniform distribution would often hit the optimum. Use *P(ground)* and the *approximation ratio*, which "
+              "describe the QAOA state itself.",
+              "- **Normalised gap for constrained problems (knapsack)** is divided by the full QUBO energy range, which "
+              "includes penalty energies; a gap that rounds to 0.0000 can still be a sub-optimal (or infeasible) "
+              "answer. The hit rate is the meaningful metric there.",
+              "- **Deeper is not automatically better.** Where the approximation ratio falls as p grows, the classical "
+              "parameter optimiser (L-BFGS-B, 2 restarts) did not find better angles for the larger p — the best "
+              "achievable value is non-decreasing in p, a found value is not.",
+              "- Runtimes are wall-clock on the machine listed above and include Python overhead; they are not "
+              "comparable to optimised C/C++ solvers or to QPU wall-clock times.",
+              "- Exact classical methods (exhaustive, MILP) solve every instance here; these instances are far too "
+              "small to say anything about quantum advantage."]
     return "\n".join(lines) + "\n"

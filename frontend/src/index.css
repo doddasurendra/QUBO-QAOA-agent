@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .card { @apply rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900; }
+  .btn { @apply inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-secondary { @apply inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800; }
+  .btn-danger { @apply inline-flex items-center gap-2 rounded-lg bg-rose-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-rose-500 disabled:opacity-50; }
+  .input { @apply w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 dark:border-slate-700 dark:bg-slate-950; }
+  .label { @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400; }
+  .table { @apply w-full text-left text-sm; }
+  .table th { @apply border-b border-slate-200 px-2 py-1.5 text-xs font-semibold uppercase text-slate-500 dark:border-slate-800; }
+  .table td { @apply border-b border-slate-100 px-2 py-1.5 align-top dark:border-slate-800/60; }
+  .badge { @apply inline-block rounded-full px-2 py-0.5 text-xs font-medium; }
+  .prose-doc h1 { @apply mb-3 text-2xl font-bold; }
+  .prose-doc h2 { @apply mb-2 mt-6 text-xl font-semibold; }
+  .prose-doc h3 { @apply mb-2 mt-4 font-semibold; }
+  .prose-doc p, .prose-doc li { @apply mb-2 text-sm leading-6; }
+  .prose-doc ul { @apply ml-5 list-disc; }
+  .prose-doc ol { @apply ml-5 list-decimal; }
+  .prose-doc code { @apply rounded bg-slate-100 px-1 font-mono text-xs dark:bg-slate-800; }
+  .prose-doc pre { @apply mb-3 overflow-x-auto rounded-lg bg-slate-900 p-3 text-xs text-slate-100; }
+  .prose-doc pre code { @apply bg-transparent p-0; }
+  .prose-doc table { @apply mb-3 text-sm; }
+  .prose-doc th, .prose-doc td { @apply border border-slate-200 px-2 py-1 dark:border-slate-700; }
+}
