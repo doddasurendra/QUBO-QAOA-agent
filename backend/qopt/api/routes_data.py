@@ -112,11 +112,21 @@ def create_job(body: JobIn, user: User = Depends(researcher), db: Session = Depe
     if body.kind == "agent":
         raise HTTPException(400, "use POST /api/agents/{name}/run for agent jobs")
     params = dict(body.params)
-    if body.experiment_id is not None:
-        _own(db.get(Experiment, body.experiment_id), user)
-        params["experiment_id"] = body.experiment_id
+    # The experiment may be given top-level or inside params (the UI sends the active model in params).
+    # Either way: enforce ownership (otherwise params.experiment_id would let a user run jobs on - and read -
+    # someone else's model) and link the job so it appears in the experiment's history.
+    eid = body.experiment_id if body.experiment_id is not None else params.get("experiment_id")
+    if eid is not None:
+        if body.experiment_id is not None and params.get("experiment_id") not in (None, body.experiment_id):
+            raise HTTPException(422, "experiment_id differs between the request and params")
+        try:
+            eid = int(eid)
+        except (TypeError, ValueError):
+            raise HTTPException(422, "experiment_id must be an integer")
+        _own(db.get(Experiment, eid), user)
+        params["experiment_id"] = eid
     try:
-        j = runner.create(db, user.id, body.kind, params, body.experiment_id)
+        j = runner.create(db, user.id, body.kind, params, eid)
     except PermissionError as e:
         raise HTTPException(429, str(e))
     except ValueError as e:

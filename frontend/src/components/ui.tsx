@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { cloneElement, isValidElement, useEffect, useId, useState, type ReactNode } from "react";
 import { ApiError } from "../api";
 
 export function Page({ title, subtitle, actions, children }: { title: string; subtitle?: string; actions?: ReactNode; children: ReactNode }) {
@@ -75,8 +75,23 @@ export function Json({ value, max = 400 }: { value: unknown; max?: number }) {
   return <pre className="max-h-[28rem] overflow-auto rounded-lg bg-slate-900 p-3 font-mono text-xs text-slate-100">{lines.slice(0, max).join("\n")}{lines.length > max ? `\n… ${lines.length - max} more lines` : ""}</pre>;
 }
 
+/** Label + control. The label is linked with htmlFor/id rather than wrapping the control, so a control's
+ *  accessible name is exactly its label (wrapping a <select> would append every option's text to it). */
 export function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
-  return <label className="block"><span className="label">{label}</span>{children}{hint && <span className="mt-1 block text-xs text-slate-500">{hint}</span>}</label>;
+  const autoId = useId();
+  let id = autoId;
+  let control = children;
+  if (isValidElement<{ id?: string }>(children)) {
+    id = children.props.id ?? autoId;
+    control = cloneElement(children, { id });
+  }
+  return (
+    <div className="block">
+      <label className="label" htmlFor={id}>{label}</label>
+      {control}
+      {hint && <span className="mt-1 block text-xs text-slate-500">{hint}</span>}
+    </div>
+  );
 }
 
 export function Spinner({ label = "Working…" }: { label?: string }) {

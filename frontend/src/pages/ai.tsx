@@ -2,7 +2,7 @@ import { useState } from "react";
 import { api, waitForJob } from "../api";
 import { can, useAuth } from "../auth";
 import { useActiveModel } from "../components/model";
-import { Card, ErrorBox, Field, fmt, Json, Note, Page, Spinner, StatusBadge, useLoad } from "../components/ui";
+import { Card, ErrorBox, fmt, Json, Note, Page, Spinner, StatusBadge, useLoad } from "../components/ui";
 
 type Turn = { role: "user" | "agent"; text: string; job?: any };
 
@@ -115,7 +115,7 @@ export function AgentsPage() {
               {a.can_delegate.length > 0 && <p className="mt-2 text-xs text-slate-500">Can delegate to: {a.can_delegate.join(", ")}</p>}
             </Card>))}
         </div>
-        <Field label="Selected agent"><div className="font-mono text-sm">{agent}</div></Field>
+        <div><div className="label">Selected agent</div><div className="font-mono text-sm">{agent}</div></div>
         <AgentChat key={agent} agent={agent} title={info.agents.find((a: any) => a.name === agent)?.title ?? agent} placeholder="Give the agent a task…" />
       </>}
       {jobs && <Card title="Recent agent runs"><table className="table"><tbody>{jobs.map((j: any) => <tr key={j.id}><td>#{j.id}</td><td>{j.solver}</td><td><StatusBadge status={j.status} /></td><td>{fmt(j.runtime_s, 1)} s</td><td className="text-xs">{new Date(j.created_at).toLocaleString()}</td></tr>)}</tbody></table></Card>}

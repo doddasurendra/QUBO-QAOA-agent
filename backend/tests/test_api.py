@@ -77,6 +77,25 @@ def test_industry_experiment_qaoa_job_and_report(admin_client):
     assert exp["jobs"][0]["id"] == j["id"]
 
 
+def test_job_with_experiment_in_params_is_linked_and_owner_checked(admin_client):
+    """Found by the browser E2E suite: the UI sends the active experiment inside params."""
+    api = admin_client
+    exp = api.post("/api/experiments", json={"name": "mine", "spec": SPEC}).json()
+    j = api.post("/api/jobs", json={"kind": "classical",
+                                    "params": {"experiment_id": exp["id"], "solver": "exhaustive"}}).json()
+    assert j["status"] == "done" and j["experiment_id"] == exp["id"]
+    assert [x["id"] for x in api.get(f"/api/experiments/{exp['id']}").json()["jobs"]] == [j["id"]]
+    # another researcher must not be able to run jobs on (and so read) this experiment via params
+    api.post("/api/users", json={"email": "other@x.co", "password": "password123", "role": "researcher"})
+    other = login(api, "other@x.co", "password123")
+    r = api.post("/api/jobs", headers=other, json={"kind": "classical",
+                                                   "params": {"experiment_id": exp["id"], "solver": "exhaustive"}})
+    assert r.status_code == 404
+    r = api.post("/api/jobs", json={"kind": "classical", "experiment_id": exp["id"],
+                                    "params": {"experiment_id": exp["id"] + 99, "solver": "exhaustive"}})
+    assert r.status_code == 422
+
+
 def test_hybrid_job_with_aer_noisy_simulator(admin_client):
     api = admin_client
     j = api.post("/api/jobs", json={"kind": "hybrid", "params": {

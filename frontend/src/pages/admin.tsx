@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { api } from "../api";
 import { useAuth } from "../auth";
-import { Card, ErrorBox, Field, fmt, Json, Note, Page, Stat, StatusBadge, useAction, useLoad } from "../components/ui";
+import { Card, ErrorBox, fmt, Json, Note, Page, Stat, StatusBadge, useAction, useLoad } from "../components/ui";
 
 export function ApiPage() {
   const [keys, err, reload] = useLoad(() => api.get("/apikeys"));
@@ -131,7 +131,7 @@ export function DocsPage() {
         <Card title="Documents"><ul className="space-y-1 text-sm">{list?.map((d: any) => <li key={d.slug}><button className={`text-left ${slug === d.slug ? "font-semibold text-indigo-600" : "hover:underline"}`} onClick={() => setSlug(d.slug)}>{d.title}</button></li>)}</ul></Card>
         <Card className="lg:col-span-3"><article className="prose-doc" dangerouslySetInnerHTML={{ __html: html }} /></Card>
       </div>
-      <Field label="Interactive API reference"><a className="text-indigo-600 underline" href="/api/docs" target="_blank" rel="noreferrer">OpenAPI / Swagger UI</a></Field>
+      <div><div className="label">Interactive API reference</div><a className="text-indigo-600 underline" href="/api/docs" target="_blank" rel="noreferrer">OpenAPI / Swagger UI</a></div>
     </Page>
   );
 }
