@@ -1,6 +1,6 @@
 # Scientific validation report
 
-Generated 2026-11-13T09:28:07.493759+00:00 by `backend/scripts/generate_reports.py` · qopt 0.1.0 · Python 3.12.0 · NumPy 2.5.4
+Generated 2026-11-13T10:03:50.869323+00:00 by `backend/scripts/generate_reports.py` · qopt 0.1.0 · Python 3.12.0 · NumPy 2.5.4
 
 Every check below was executed; nothing is hand-entered.
 
@@ -55,6 +55,9 @@ For every decision assignment: feasible ⇒ QUBO energy = objective; infeasible 
 | logistics.dock_scheduling | 16 | 0 | 36 / 65536 | 4 | ✅ |
 | manufacturing.machine_scheduling | 8 | 0 | 8 / 256 | 72 | ✅ |
 | manufacturing.job_shop | 12 | 0 | 26 / 4096 | 6 | ✅ |
+| manufacturing.production_planning | 18 | 22 | 21 / 262144 | 39 | ✅ |
+| supply_chain.facility_location | 18 | 9 | 192 / 262144 | 90 | ✅ |
+| supply_chain.supplier_selection | 7 | 6 | 69 / 128 | 25 | ✅ |
 
 Each module's optimum is additionally checked against an independent brute-force solver written directly from the problem definition (no Model / QUBO): `tests/test_industries_reference.py`.
 
@@ -103,4 +106,4 @@ Tested in `tests/test_qaoa.py::test_xy_mixer_matches_qiskit_and_preserves_one_ho
 - QAOA results here are exact noiseless simulation. No real-QPU runs were performed (no credentials configured).
 - Penalty dominance is guaranteed for integer-coefficient constraints; non-integer equality constraints are flagged with a warning and must be checked via `validate_compiled`.
 
-Total generation time: 21.6 s
+Total generation time: 9.7 s

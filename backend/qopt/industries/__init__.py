@@ -11,6 +11,7 @@ from .logistics import DeliveryRouting
 from .logistics_ext import CargoLoading, DockScheduling, VehicleRouting
 from .manufacturing import MachineScheduling
 from .manufacturing_ext import JobShopScheduling
+from .supply_chain import FacilityLocation, ProductionPlanning, SupplierSelection
 from .telecom import BaseStationAssignment
 from .telecom_ext import NetworkRouting, SpectrumAllocation
 
@@ -26,7 +27,9 @@ PROBLEMS: Dict[str, IndustryProblem] = {p.key: p for p in (
     # logistics
     DeliveryRouting(), VehicleRouting(), CargoLoading(), DockScheduling(),
     # manufacturing
-    MachineScheduling(), JobShopScheduling(),
+    MachineScheduling(), JobShopScheduling(), ProductionPlanning(),
+    # supply chain
+    FacilityLocation(), SupplierSelection(),
 )}
 
 

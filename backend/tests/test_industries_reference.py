@@ -14,7 +14,8 @@ from qopt.core import validate_compiled
 from qopt.industries import get_problem
 from qopt.industries.energy_ext import battery_cost, uc_cost
 from qopt.industries.logistics_ext import best_tour
-from qopt.solvers import exhaustive, milp_solve
+from qopt.industries.supply_chain import facility_cost, production_cost, supplier_cost
+from qopt.solvers import exhaustive
 
 INF = math.inf
 
@@ -22,12 +23,12 @@ INF = math.inf
 def qubo_optimum(key):
     p = get_problem(key)
     data, cm = p.compile(p.example())
-    rep = validate_compiled(cm)
+    rep = validate_compiled(cm)          # exhaustive over all decision assignments ⇒ proven optimum
     assert rep.passed, rep.issues
-    r = exhaustive(cm.qubo) if cm.qubo.num_variables <= 16 else milp_solve(cm.qubo)
-    assert r.optimal
-    ev = cm.evaluate(r.best_x)
+    ev = cm.evaluate(np.array([int(c) for c in rep.best_feasible[0]]))
     assert ev.feasible and ev.objective == pytest.approx(rep.best_feasible_objective)
+    if cm.qubo.num_variables <= 16:       # cross-check with an independent solver path where cheap
+        assert cm.evaluate(exhaustive(cm.qubo).best_x).objective == pytest.approx(ev.objective)
     return p, data, ev, p.interpret(data, ev.assignment)
 
 
@@ -204,6 +205,36 @@ def test_dock_scheduling_reference():
             best = min(best, sum(d.handling_cost[t][k] + d.waiting_cost[t] * (s - d.arrival_slot[t])
                                  for t, (k, s) in enumerate(choice)))
     assert ev.objective == pytest.approx(best) == pytest.approx(out["total_cost"])
+
+
+# ------------------------------------------------------------------ supply chain
+def test_production_planning_reference():
+    p, d, ev, out = qubo_optimum("manufacturing.production_planning")
+    P, T = len(d.products), len(d.periods)
+    best = INF
+    for flat in itertools.product(*[range(d.max_production[pp] + 1) for pp in range(P) for _ in range(T)]):
+        q = [list(flat[pp * T:(pp + 1) * T]) for pp in range(P)]
+        c = production_cost(d, q)
+        if c is not None:
+            best = min(best, c)
+    assert ev.objective == pytest.approx(best) == pytest.approx(out["total_cost"])
+
+
+def test_facility_location_reference():
+    p, d, ev, out = qubo_optimum("supply_chain.facility_location")
+    costs = [facility_cost(d, list(a)) for a in itertools.product(range(len(d.facilities)), repeat=len(d.customers))]
+    best = min(c for c in costs if c is not None)
+    assert ev.objective == pytest.approx(best) == pytest.approx(out["total_cost"])
+
+
+def test_supplier_selection_reference():
+    p, d, ev, out = qubo_optimum("supply_chain.supplier_selection")
+    costs = [supplier_cost(d, [s for s, b in enumerate(bits) if b])
+             for bits in itertools.product([0, 1], repeat=len(d.suppliers))]
+    best = min(c for c in costs if c is not None)
+    assert ev.objective == pytest.approx(best) == pytest.approx(out["total_cost"])
+    # the regional-concentration penalty must steer away from picking both Shenzhen suppliers
+    assert out["suppliers_per_region"].get("CN", 0) <= 1
 
 
 # ------------------------------------------------------------------ manufacturing

@@ -9,8 +9,8 @@ backend/
   qopt/quantum     statevector QAOA (adjoint gradients), mixers, Qiskit circuits, bit-order helpers
   qopt/providers   Aer, IBM Runtime, Amazon Braket, D-Wave (annealer) + registry
   qopt/hybrid      solver recommendation + hybrid execution + ranking
-  qopt/industries  20 industry templates (schema, formulation, interpretation, sample data);
-                   *_ext.py hold the second-wave modules
+  qopt/industries  23 industry templates (schema, formulation, interpretation, sample data);
+                   *_ext.py and supply_chain.py hold the later modules
   qopt/agents      Claude tool-use orchestrator, 10 agent roles, tool registry
   qopt/services    jobs, audit, security, research search, reports, agent persistence bridge
   qopt/api         FastAPI app and routers

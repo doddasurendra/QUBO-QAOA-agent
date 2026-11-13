@@ -70,9 +70,23 @@ def test_quadratic_equality_conflict_constraint():
     m2 = Model()
     a, b = m2.binaries(["a", "b"])
     m2.minimize(a)
-    m2.add_constraint(a * b - b == 0, "bad")
+    m2.add_constraint(a * b - b == 0, "bad")          # = b(a-1) ≤ 0: not a valid penalty
     with pytest.raises(ValueError, match="non-negative"):
         m2.compile()
+    # x(1-z) == 0  ("x implies z") has a negative coefficient but is ≥ 0 everywhere → accepted, exact
+    m3 = Model()
+    x, z = m3.binaries(["x", "z"])
+    m3.minimize(-3 * x + 2 * z)
+    m3.add_constraint(x * (1 - z) == 0, "x_implies_z")
+    rep = validate_compiled(m3.compile())
+    assert rep.passed and rep.best_feasible == ["11"] and rep.best_feasible_objective == -1
+    # a quadratic constraint that can never be satisfied is rejected at compile time
+    m4 = Model()
+    x, z = m4.binaries(["x", "z"])
+    m4.minimize(x)
+    m4.add_constraint(x * z + 1 == 0, "impossible")                 # ≥ 1 for every assignment
+    with pytest.raises(ValueError, match="infeasible"):
+        m4.compile()
 
 
 def test_hybrid_end_to_end_portfolio():

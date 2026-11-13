@@ -161,11 +161,14 @@ class Model:
             P = c.penalty if c.penalty is not None else P_auto
             penalties[c.label] = P
             if lhs.degree == 2:
-                # (lhs)^2 would be degree 4. If every coefficient is ≥ 0 then lhs ≥ 0 on {0,1}^n,
-                # so P·lhs is zero exactly when the constraint holds and ≥ P·min|coef| otherwise.
-                if lhs.const < 0 or any(v < 0 for v in list(lhs.lin.values()) + list(lhs.quad.values())):
-                    raise ValueError(f"quadratic equality {c.label!r} must have non-negative coefficients "
-                                     "and right-hand side 0 (e.g. x*y == 0); otherwise linearise it")
+                # (lhs)^2 would be degree 4. If lhs ≥ 0 on every binary assignment then P·lhs is zero
+                # exactly when the constraint holds and positive otherwise.
+                ok, vmin = _quadratic_nonnegative(lhs)
+                if not ok:
+                    raise ValueError(f"quadratic equality {c.label!r} must be non-negative for every binary "
+                                     "assignment (e.g. x*y == 0 or x*(1-z) == 0); otherwise linearise it")
+                if vmin > 1e-12:
+                    raise ValueError(f"constraint {c.label!r} is infeasible for every assignment (lhs ≥ {vmin:g})")
                 if not lhs.is_integral():
                     warnings.append(f"quadratic constraint {c.label!r} has non-integer coefficients")
                 total = total + P * lhs
@@ -225,6 +228,29 @@ class Model:
                              c.get("resolution"), c.get("kind", "general"))
         m.metadata = dict(spec.get("metadata") or {})
         return m
+
+
+def _quadratic_nonnegative(e: Expr, max_enum: int = 16) -> Tuple[bool, float]:
+    """Decide whether a quadratic expression is ≥ 0 on all of {0,1}^n; returns (ok, minimum).
+
+    All-non-negative coefficients prove it immediately. Otherwise the expression's own variables are
+    enumerated exactly (≤ max_enum of them); larger expressions with negative terms are rejected."""
+    coefs = [e.const, *e.lin.values(), *e.quad.values()]
+    if all(c >= 0 for c in coefs):
+        return True, e.const
+    vs = sorted(e.variables())
+    if len(vs) > max_enum:
+        return False, -np.inf
+    idx = {v: i for i, v in enumerate(vs)}
+    k = np.arange(1 << len(vs))
+    X = ((k[:, None] >> np.arange(len(vs))[None, :]) & 1).astype(float)
+    val = np.full(len(k), e.const)
+    for v, c in e.lin.items():
+        val += c * X[:, idx[v]]
+    for (u, v), c in e.quad.items():
+        val += c * X[:, idx[u]] * X[:, idx[v]]
+    vmin = float(val.min())
+    return vmin >= -1e-12, vmin
 
 
 def _binary_expansion_weights(max_value: int) -> List[int]:
