@@ -1,17 +1,9 @@
 #!/usr/bin/env bash
-# Each case runs in a fresh process. Prints OK / CRASH per case. Diagnostic only; always exits 0.
-# The API fixture works outside pytest; find which pytest mechanism makes Qiskit segfault on the Linux runner.
+# Diagnostic only; always exits 0. Native (gdb) backtrace of the Qiskit segfault under pytest on the Linux runner.
 cd "$(dirname "$0")/../../backend" || exit 1
-python -c "import pytest, anyio, starlette, fastapi; print('pytest', pytest.__version__, 'anyio', anyio.__version__, 'starlette', starlette.__version__, 'fastapi', fastapi.__version__)"
-run() {
-  local name="$1"; shift
-  if timeout 600 python -X faulthandler -m pytest -x -v -p no:randomly "$@" tests/test_api.py >/tmp/case.log 2>&1; then echo "OK     $name"
-  else echo "CRASH  $name (exit $?)"; grep -E '^tests/.*(PASSED|FAILED|ERROR)' /tmp/case.log | tail -n 1 | sed 's/^/         last finished: /'; grep -m2 'File ' /tmp/case.log | sed 's/^/         /'; fi
-}
-run "default"
-run "-s (no output capture)"          -s
-run "--capture=sys"                   --capture=sys
-run "-p no:faulthandler"              -p no:faulthandler
-run "--assert=plain"                  --assert=plain
-run "-s -p no:faulthandler"           -s -p no:faulthandler
+command -v gdb >/dev/null || sudo apt-get install -y -qq gdb >/dev/null 2>&1
+timeout 900 gdb -q -batch -ex "set pagination off" -ex "handle SIGPIPE nostop noprint" -ex run -ex "bt 40" \
+  -ex "info sharedlibrary qiskit" -ex "info registers rip rsp" -ex "x/6i \$pc" \
+  --args python -m pytest -x -q -p no:faulthandler tests/test_api.py -k bootstrap_only 2>&1 \
+  | grep -vE '^\[(New|Thread .* exited)|^\[Inferior|libthread_db|Using host' | tail -n 80 | sed 's/^/GDB| /'
 exit 0
