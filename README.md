@@ -26,6 +26,16 @@ cd ..\backend; ..\.venv\Scripts\uvicorn qopt.api.app:app --port 8000
 cd ..\frontend; npx playwright install chromium firefox webkit; npm run e2e   # browser E2E in 3 engines
 ```
 
+## Run in production mode without Docker (Windows)
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\run-production.ps1      # → http://localhost:8080
+```
+
+Creates `.env` with random secrets if missing, installs the backend as a package into `.run/` (the same layout as
+the Docker image) and serves the API + UI in production mode with a persistent SQLite database. `-Port 9000` changes
+the port; `-Rebuild` reinstalls after code changes.
+
 ## Deploy (Docker + PostgreSQL)
 
 ```bash

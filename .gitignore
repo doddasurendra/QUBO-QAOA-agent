@@ -16,3 +16,4 @@ frontend/e2e/.auth/
 frontend/e2e/.results/
 frontend/e2e/.report/
 frontend/e2e/.work/
+.run/

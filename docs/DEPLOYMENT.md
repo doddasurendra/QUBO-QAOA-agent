@@ -27,6 +27,13 @@ Production mode refuses to start without a strong `QOPT_JWT_SECRET`.
   WSL2/Hyper-V with admin rights and a reboot). CI (`.github/workflows/ci.yml`) builds the image. On a Docker
   host, run the commands above; then check `docker compose ps` shows the app as `healthy`.
 
+### Without Docker on Windows (one command)
+
+`powershell -ExecutionPolicy Bypass -File scripts\run-production.ps1` serves the app at http://localhost:8080 in
+production mode: it creates `.env` with random secrets if missing, installs the backend package into `.run/site`,
+uses `.run/qopt.db` (SQLite) and the built SPA. Binds to 127.0.0.1 only; put a reverse proxy with TLS in front
+before exposing it to a network.
+
 ### Without Docker (single host)
 
 ```bash
