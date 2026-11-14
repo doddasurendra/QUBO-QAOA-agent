@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hmac
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -58,7 +59,9 @@ def _create(db: Session, body: NewUser, role: str) -> User:
 @router.get("/auth/status")
 def auth_status(db: Session = Depends(get_db)):
     n = db.scalar(select(func.count()).select_from(User)) or 0
-    return {"bootstrap_required": n == 0, "registration_open": get_settings().allow_registration}
+    s = get_settings()
+    return {"bootstrap_required": n == 0, "registration_open": s.allow_registration,
+            "bootstrap_token_required": n == 0 and s.bootstrap_token_required()}
 
 
 @router.post("/auth/bootstrap")
@@ -66,6 +69,18 @@ def bootstrap(body: NewUser, request: Request, db: Session = Depends(get_db)):
     """Create the first administrator. Only works while the user table is empty."""
     if (db.scalar(select(func.count()).select_from(User)) or 0) > 0:
         raise HTTPException(403, "bootstrap already completed")
+    s = get_settings()
+    if s.bootstrap_token_required():
+        ip = client_ip(request)
+        ok, retry = rate_limiter.allow(f"bootstrap:{ip}", 10)
+        if not ok:
+            raise HTTPException(429, "too many attempts", headers={"Retry-After": str(int(retry) + 1)})
+        if not s.bootstrap_token:
+            raise HTTPException(403, "administrator setup is disabled: set QOPT_BOOTSTRAP_TOKEN on the server")
+        supplied = request.headers.get("x-bootstrap-token", "")
+        if not hmac.compare_digest(supplied.encode(), s.bootstrap_token.encode()):
+            audit("bootstrap_admin", None, body.email.lower(), success=False, ip=ip, db=db)
+            raise HTTPException(403, "invalid setup token")
     u = _create(db, body, "admin")
     audit("bootstrap_admin", u.id, f"user:{u.id}", ip=client_ip(request), db=db)
     tok, exp = create_token(u.id, u.role)

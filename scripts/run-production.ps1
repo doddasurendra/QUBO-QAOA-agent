@@ -25,6 +25,15 @@ if (-not (Test-Path $EnvFile)) {
   [IO.File]::WriteAllText($EnvFile, $text, [Text.UTF8Encoding]::new($false))
   Write-Host "Created .env with generated secrets (keep it private; it is git-ignored)."
 }
+# The one-time admin setup token (required in production); add it to an existing .env that predates it.
+if (-not (Select-String -Path $EnvFile -Pattern "^QOPT_BOOTSTRAP_TOKEN=\S" -Quiet)) {
+  $tok = & $Py -c "import secrets;print(secrets.token_urlsafe(24))"
+  $text = Get-Content $EnvFile -Raw
+  if ($text -match "(?m)^QOPT_BOOTSTRAP_TOKEN=") { $text = $text -replace "(?m)^QOPT_BOOTSTRAP_TOKEN=.*$", "QOPT_BOOTSTRAP_TOKEN=$tok" }
+  else { $text = $text.TrimEnd() + "`nQOPT_BOOTSTRAP_TOKEN=$tok`n" }
+  [IO.File]::WriteAllText($EnvFile, $text, [Text.UTF8Encoding]::new($false))
+}
+Write-Host "First visit: create the administrator with the setup token = QOPT_BOOTSTRAP_TOKEN in $EnvFile"
 foreach ($line in Get-Content $EnvFile) {
   if ($line -match "^\s*([A-Z0-9_]+)=(.*)$" -and $Matches[2] -ne "") { Set-Item -Path "env:$($Matches[1])" -Value $Matches[2] }
 }

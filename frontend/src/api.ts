@@ -21,8 +21,9 @@ export const auth = {
   },
 };
 
-async function request<T = any>(method: string, path: string, body?: unknown, form?: FormData): Promise<T> {
-  const headers: Record<string, string> = {};
+async function request<T = any>(method: string, path: string, body?: unknown, form?: FormData,
+                                extra: Record<string, string> = {}): Promise<T> {
+  const headers: Record<string, string> = { ...extra };
   if (auth.token) headers["Authorization"] = `Bearer ${auth.token}`;
   if (body !== undefined && !form) headers["Content-Type"] = "application/json";
   const res = await fetch(`/api${path}`, { method, headers, body: form ?? (body !== undefined ? JSON.stringify(body) : undefined) });
@@ -41,7 +42,7 @@ async function request<T = any>(method: string, path: string, body?: unknown, fo
 
 export const api = {
   get: <T = any>(p: string) => request<T>("GET", p),
-  post: <T = any>(p: string, b?: unknown) => request<T>("POST", p, b ?? {}),
+  post: <T = any>(p: string, b?: unknown, headers?: Record<string, string>) => request<T>("POST", p, b ?? {}, undefined, headers),
   patch: <T = any>(p: string, b?: unknown) => request<T>("PATCH", p, b ?? {}),
   del: <T = any>(p: string) => request<T>("DELETE", p),
   upload: <T = any>(p: string, form: FormData) => request<T>("POST", p, undefined, form),

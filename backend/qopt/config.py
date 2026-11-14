@@ -21,6 +21,12 @@ class Settings(BaseSettings):
     jwt_secret: str = ""
     jwt_expiry_minutes: int = 120
     allow_registration: bool = False            # self-service researcher accounts
+    # One-time token required to create the first administrator in production (so the first visitor of a public
+    # deployment cannot claim admin). Empty in production → bootstrap disabled. Not required in development.
+    bootstrap_token: str = ""
+
+    def bootstrap_token_required(self) -> bool:
+        return self.environment == "production"
     cors_origins: List[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
     rate_limit_per_minute: int = 240
     agent_rate_limit_per_minute: int = 10

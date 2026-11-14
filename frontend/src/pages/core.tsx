@@ -7,18 +7,22 @@ import { Card, ErrorBox, Field, fmt, KindBadge, Note, Page, Stat, StatusBadge, u
 
 export function LoginPage() {
   const { login } = useAuth();
-  const [status, setStatus] = useState<{ bootstrap_required: boolean; registration_open: boolean }>();
+  const [status, setStatus] = useState<{ bootstrap_required: boolean; registration_open: boolean; bootstrap_token_required?: boolean }>();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [setupToken, setSetupToken] = useState("");
   const { busy, error, run } = useAction();
   useEffect(() => { api.get("/auth/status").then(setStatus).catch(() => {}); }, []);
   const boot = status?.bootstrap_required;
+  const needToken = boot && status?.bootstrap_token_required;
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
     run(async () => {
-      const r = await api.post(boot ? "/auth/bootstrap" : "/auth/login", boot ? { email, password, name } : { email, password });
+      const r = boot
+        ? await api.post("/auth/bootstrap", { email, password, name }, needToken ? { "X-Bootstrap-Token": setupToken } : undefined)
+        : await api.post("/auth/login", { email, password });
       login(r.access_token, r.user);
     });
   };
@@ -30,6 +34,9 @@ export function LoginPage() {
           <p className="text-sm text-slate-600 dark:text-slate-400">QUBO / QAOA hybrid optimisation platform</p>
         </div>
         {boot && <Note tone="warn">No users exist yet. Create the first <b>administrator</b> account.</Note>}
+        {needToken && <Field label="Setup token" hint="The QOPT_BOOTSTRAP_TOKEN value configured on the server.">
+          <input className="input" type="password" required autoComplete="off" value={setupToken} onChange={(e) => setSetupToken(e.target.value)} />
+        </Field>}
         {boot && <Field label="Name"><input className="input" value={name} onChange={(e) => setName(e.target.value)} /></Field>}
         <Field label="Email"><input className="input" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" /></Field>
         <Field label="Password" hint={boot ? "At least 10 characters." : undefined}>

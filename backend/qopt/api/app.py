@@ -64,7 +64,7 @@ def create_app() -> FastAPI:
                   docs_url="/api/docs", openapi_url="/api/openapi.json", redoc_url=None)
     app.add_middleware(CORSMiddleware, allow_origins=s.cors_origins, allow_credentials=False,
                        allow_methods=["GET", "POST", "PATCH", "DELETE"], allow_headers=["Authorization", "Content-Type",
-                                                                                        "X-API-Key"])
+                                                                                        "X-API-Key", "X-Bootstrap-Token"])
     log = logging.getLogger("qopt.http")
 
     @app.middleware("http")

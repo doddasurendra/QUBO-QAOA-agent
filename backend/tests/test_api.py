@@ -24,6 +24,41 @@ def test_bootstrap_only_once_and_auth_required(api):
     assert api.post("/api/auth/register", json={"email": "x@y.co", "password": "longenough1"}).status_code == 403
 
 
+def test_production_bootstrap_requires_setup_token(tmp_path, monkeypatch):
+    """Public deployments: the first visitor must not be able to claim admin without the server's setup token."""
+    from fastapi.testclient import TestClient
+    from qopt.api.app import create_app
+    from qopt.config import get_settings
+    from qopt.db import reset_engine
+    from qopt.services.security import rate_limiter
+    monkeypatch.setenv("QOPT_DATABASE_URL", f"sqlite:///{(tmp_path / 'p.db').as_posix()}")
+    monkeypatch.setenv("QOPT_ENVIRONMENT", "production")
+    monkeypatch.setenv("QOPT_JWT_SECRET", "p" * 48)
+    monkeypatch.setenv("QOPT_WORKER_THREADS", "0")
+    body = {"email": "owner@x.co", "password": "owner-password-1"}
+    try:
+        for token_setting, expect_status_needed in (("", True), ("s3tup-token-value-0123456789", True)):
+            monkeypatch.setenv("QOPT_BOOTSTRAP_TOKEN", token_setting)
+            get_settings.cache_clear(); reset_engine(); rate_limiter.reset()
+            with TestClient(create_app()) as c:
+                st = c.get("/api/auth/status").json()
+                assert st["bootstrap_required"] and st["bootstrap_token_required"] is expect_status_needed
+                r = c.post("/api/auth/bootstrap", json=body)                      # no token
+                assert r.status_code == 403
+                if not token_setting:
+                    assert "disabled" in r.json()["detail"]
+                    continue
+                r = c.post("/api/auth/bootstrap", json=body, headers={"X-Bootstrap-Token": "wrong"})
+                assert r.status_code == 403 and "invalid setup token" in r.json()["detail"]
+                r = c.post("/api/auth/bootstrap", json=body, headers={"X-Bootstrap-Token": token_setting})
+                assert r.status_code == 200 and r.json()["user"]["role"] == "admin"
+                assert c.get("/api/auth/status").json()["bootstrap_token_required"] is False
+                assert c.post("/api/auth/bootstrap", json={**body, "email": "x@x.co"},
+                              headers={"X-Bootstrap-Token": token_setting}).status_code == 403   # once only
+    finally:
+        reset_engine(); get_settings.cache_clear(); rate_limiter.reset()
+
+
 def test_rbac_viewer_cannot_run_jobs_and_researcher_cannot_admin(admin_client):
     api = admin_client
     for email, role in (("v@x.co", "viewer"), ("r@x.co", "researcher")):
