@@ -2,7 +2,7 @@ import { useState } from "react";
 import { api, saveBlob, saveJson, type ModelRef } from "../api";
 import { useActiveModel, RequireModel } from "../components/model";
 import { MatrixHeatmap } from "../components/viz";
-import { Card, ErrorBox, Field, fmt, Json, Note, Page, useAction } from "../components/ui";
+import { Card, ErrorBox, Field, FOCUS, fmt, Json, Note, Page, useAction } from "../components/ui";
 
 type Cons = { label: string; coefs: Record<string, string>; sense: "==" | "<=" | ">="; rhs: string; one_hot: boolean };
 
@@ -64,15 +64,15 @@ export function BuilderPage() {
           </div>
           <table className="table mt-3"><thead><tr><th>variable (binary)</th><th>linear coefficient</th><th /></tr></thead>
             <tbody>{vars.map((v) => (
-              <tr key={v}><td className="font-mono">{v}</td><td><input className="input" value={lin[v] ?? ""} onChange={(e) => setLin({ ...lin, [v]: e.target.value })} /></td>
-                <td><button className="btn-secondary" onClick={() => { setVars(vars.filter((x) => x !== v)); setQuad(quad.filter((q) => q.u !== v && q.v !== v)); }}>✕</button></td></tr>))}</tbody></table>
-          <div className="mt-2 flex gap-2"><input className="input" placeholder="new variable name" value={newVar} onChange={(e) => setNewVar(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addVar()} /><button className="btn-secondary" onClick={addVar}>Add</button></div>
+              <tr key={v}><td className="font-mono">{v}</td><td><input className="input" aria-label={`Linear coefficient of ${v}`} value={lin[v] ?? ""} onChange={(e) => setLin({ ...lin, [v]: e.target.value })} /></td>
+                <td><button className="btn-secondary" aria-label={`Remove variable ${v}`} onClick={() => { setVars(vars.filter((x) => x !== v)); setQuad(quad.filter((q) => q.u !== v && q.v !== v)); }}>✕</button></td></tr>))}</tbody></table>
+          <div className="mt-2 flex gap-2"><input className="input" aria-label="New variable name" placeholder="new variable name" value={newVar} onChange={(e) => setNewVar(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addVar()} /><button className="btn-secondary" onClick={addVar}>Add</button></div>
           <div className="label mt-4">Quadratic terms c · u · v</div>
           {quad.map((q, i) => (
             <div key={i} className="mb-1 flex gap-1">
-              {(["u", "v"] as const).map((k) => <select key={k} className="input" value={q[k]} onChange={(e) => setQuad(quad.map((x, j) => (j === i ? { ...x, [k]: e.target.value } : x)))}><option value="">—</option>{vars.map((v) => <option key={v}>{v}</option>)}</select>)}
-              <input className="input w-24" value={q.c} onChange={(e) => setQuad(quad.map((x, j) => (j === i ? { ...x, c: e.target.value } : x)))} />
-              <button className="btn-secondary" onClick={() => setQuad(quad.filter((_, j) => j !== i))}>✕</button>
+              {(["u", "v"] as const).map((k) => <select key={k} className="input" aria-label={`Quadratic term ${i + 1}: ${k === "u" ? "first" : "second"} variable`} value={q[k]} onChange={(e) => setQuad(quad.map((x, j) => (j === i ? { ...x, [k]: e.target.value } : x)))}><option value="">—</option>{vars.map((v) => <option key={v}>{v}</option>)}</select>)}
+              <input className="input w-24" aria-label={`Quadratic term ${i + 1}: coefficient`} value={q.c} onChange={(e) => setQuad(quad.map((x, j) => (j === i ? { ...x, c: e.target.value } : x)))} />
+              <button className="btn-secondary" aria-label={`Remove quadratic term ${i + 1}`} onClick={() => setQuad(quad.filter((_, j) => j !== i))}>✕</button>
             </div>))}
           <button className="btn-secondary" onClick={() => setQuad([...quad, { u: "", v: "", c: "1" }])}>+ quadratic term</button>
         </Card>
@@ -80,14 +80,14 @@ export function BuilderPage() {
           {cons.map((c, i) => (
             <div key={i} className="mb-3 rounded-lg border border-slate-200 p-2 dark:border-slate-800">
               <div className="mb-2 flex gap-2">
-                <input className="input" value={c.label} onChange={(e) => setCons(cons.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} placeholder="label" />
+                <input className="input" aria-label={`Constraint ${i + 1} label`} value={c.label} onChange={(e) => setCons(cons.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)))} placeholder="label" />
                 <label className="flex items-center gap-1 whitespace-nowrap text-xs"><input type="checkbox" checked={c.one_hot} onChange={(e) => setCons(cons.map((x, j) => (j === i ? { ...x, one_hot: e.target.checked } : x)))} />one-hot (XY mixer)</label>
-                <button className="btn-secondary" onClick={() => setCons(cons.filter((_, j) => j !== i))}>✕</button>
+                <button className="btn-secondary" aria-label={`Remove constraint ${c.label || i + 1}`} onClick={() => setCons(cons.filter((_, j) => j !== i))}>✕</button>
               </div>
               <div className="flex flex-wrap items-center gap-1 text-sm">
-                {vars.map((v, k) => <span key={v} className="flex items-center gap-1">{k > 0 && "+"}<input className="input w-14" value={c.coefs[v] ?? ""} onChange={(e) => setCons(cons.map((x, j) => (j === i ? { ...x, coefs: { ...x.coefs, [v]: e.target.value } } : x)))} /><span className="font-mono">{v}</span></span>)}
-                <select className="input w-16" value={c.sense} onChange={(e) => setCons(cons.map((x, j) => (j === i ? { ...x, sense: e.target.value as any } : x)))}><option>==</option><option>{"<="}</option><option>{">="}</option></select>
-                <input className="input w-16" value={c.rhs} onChange={(e) => setCons(cons.map((x, j) => (j === i ? { ...x, rhs: e.target.value } : x)))} />
+                {vars.map((v, k) => <span key={v} className="flex items-center gap-1">{k > 0 && "+"}<input className="input w-14" aria-label={`Constraint ${c.label || i + 1}: coefficient of ${v}`} value={c.coefs[v] ?? ""} onChange={(e) => setCons(cons.map((x, j) => (j === i ? { ...x, coefs: { ...x.coefs, [v]: e.target.value } } : x)))} /><span className="font-mono">{v}</span></span>)}
+                <select className="input w-16" aria-label={`Constraint ${c.label || i + 1}: comparison`} value={c.sense} onChange={(e) => setCons(cons.map((x, j) => (j === i ? { ...x, sense: e.target.value as any } : x)))}><option>==</option><option>{"<="}</option><option>{">="}</option></select>
+                <input className="input w-16" aria-label={`Constraint ${c.label || i + 1}: right-hand side`} value={c.rhs} onChange={(e) => setCons(cons.map((x, j) => (j === i ? { ...x, rhs: e.target.value } : x)))} />
               </div>
             </div>))}
           <button className="btn-secondary" onClick={() => setCons([...cons, { label: `c${cons.length}`, coefs: {}, sense: "<=", rhs: "1", one_hot: false }])}>+ constraint</button>
@@ -120,7 +120,7 @@ function CompileResult({ r }: { r: any }) {
         {r.matrix_upper && <div className="mt-3"><MatrixHeatmap matrix={r.matrix_upper} labels={r.qubo.variables} /></div>}
       </Card>
       <Card title="Ising form & checks">
-        <p className="mb-2 text-sm">QUBO ↔ Ising equivalence: {r.structural_validation.ising_equivalence ? (r.structural_validation.ising_equivalence.passed ? <b className="text-emerald-600">verified on all {r.structural_validation.ising_equivalence.checked} assignments</b> : <b className="text-rose-600">FAILED</b>) : "not checked (> 16 variables)"}</p>
+        <p className="mb-2 text-sm">QUBO ↔ Ising equivalence: {r.structural_validation.ising_equivalence ? (r.structural_validation.ising_equivalence.passed ? <b className="text-ok">verified on all {r.structural_validation.ising_equivalence.checked} assignments</b> : <b className="text-bad">FAILED</b>) : "not checked (> 16 variables)"}</p>
         <Json value={r.ising} max={120} />
       </Card>
     </div>
@@ -143,7 +143,7 @@ export function MatrixPage() {
           <button className="btn-secondary" disabled={busy} onClick={() => run(async () => setRed(await api.post("/qubo/reduce", ref)))}>Run safe variable reduction</button>
         </div>)}</RequireModel>
       <Card title="…or paste a matrix (E = xᵀQx)">
-        <textarea className="input h-24 font-mono text-xs" value={paste} onChange={(e) => setPaste(e.target.value)} />
+        <textarea className="input h-24 font-mono text-xs" aria-label="QUBO matrix as JSON (rows of numbers)" value={paste} onChange={(e) => setPaste(e.target.value)} />
         <button className="btn-secondary mt-2" disabled={busy} onClick={() => run(async () => setR(await api.post("/qubo/from-matrix", { matrix: JSON.parse(paste) })))}>Import matrix</button>
       </Card>
       <ErrorBox error={error} />
@@ -151,7 +151,7 @@ export function MatrixPage() {
       {r && (
         <Card title={`Q (${r.qubo.variables.length}×${r.qubo.variables.length}), offset ${fmt(r.qubo.offset)}`} actions={
           <div className="flex gap-2">
-            <select className="input" value={conv} onChange={(e) => setConv(e.target.value as any)}><option value="upper">upper-triangular</option><option value="symmetric">symmetric</option></select>
+            <select className="input" aria-label="Matrix convention" value={conv} onChange={(e) => setConv(e.target.value as any)}><option value="upper">upper-triangular</option><option value="symmetric">symmetric</option></select>
             <button className="btn-secondary" onClick={() => saveJson(r.qubo, "qubo.json")}>JSON</button>
             {r.matrix_upper && <button className="btn-secondary" onClick={() => saveBlob(new Blob([toCsv(conv === "upper" ? r.matrix_upper : r.matrix_symmetric, r.qubo.variables)], { type: "text/csv" }), `qubo-${conv}.csv`)}>CSV</button>}
           </div>}>
@@ -180,7 +180,7 @@ export function ValidationPage() {
           <Card title={`Exhaustive checks over ${r.exhaustive.num_states} decision assignments`}>
             <table className="table"><thead><tr><th>check</th><th>result</th><th>details</th></tr></thead>
               <tbody>{Object.entries(r.exhaustive.checks).map(([k, v]: [string, any]) => (
-                <tr key={k}><td>{k.replace(/_/g, " ")}</td><td>{v.passed ? <span className="text-emerald-600">pass</span> : <span className="text-rose-600">FAIL</span>}</td>
+                <tr key={k}><td>{k.replace(/_/g, " ")}</td><td>{v.passed ? <span className="text-ok">pass</span> : <span className="text-bad">FAIL</span>}</td>
                   <td className="font-mono text-xs">{JSON.stringify(Object.fromEntries(Object.entries(v).filter(([kk]) => kk !== "passed")))}</td></tr>))}</tbody></table>
             <div className="mt-3 grid gap-2 text-sm sm:grid-cols-3">
               <div>Feasible assignments: <b>{r.exhaustive.num_feasible}</b></div>
@@ -210,7 +210,7 @@ export function IsingPage() {
             <tbody>{Object.entries(r.ising.h).map(([i, h]: [string, any]) => <tr key={i}><td>z{i}</td><td className="font-mono">{r.ising.variables[Number(i)]}</td><td className="tabular-nums">{fmt(h)}</td></tr>)}</tbody></table>
         </Card>
         <Card title={`Couplings J (${r.ising.J.length})`}>
-          <div className="max-h-80 overflow-auto"><table className="table"><thead><tr><th>i</th><th>j</th><th>J</th></tr></thead>
+          <div role="region" aria-label="Couplings J" tabIndex={0} className={`max-h-80 overflow-auto ${FOCUS}`}><table className="table"><thead><tr><th>i</th><th>j</th><th>J</th></tr></thead>
             <tbody>{r.ising.J.slice(0, 300).map(([i, j, c]: number[]) => <tr key={`${i}-${j}`}><td>{r.ising.variables[i]}</td><td>{r.ising.variables[j]}</td><td className="tabular-nums">{fmt(c)}</td></tr>)}</tbody></table></div>
         </Card>
         <Card title="Evaluate an assignment in both forms">

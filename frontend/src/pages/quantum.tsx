@@ -5,7 +5,7 @@ import { can, useAuth } from "../auth";
 import { HistoryChart, JobHeader, SamplesTable, DomainView, useJob } from "../components/jobs";
 import { RequireModel } from "../components/model";
 import { CircuitView, Landscape } from "../components/viz";
-import { Card, ErrorBox, Field, fmt, Json, KindBadge, Note, Page, StatusBadge, useAction, useLoad } from "../components/ui";
+import { Card, ErrorBox, Field, FOCUS, fmt, Json, KindBadge, Note, Page, StatusBadge, useAction, useLoad } from "../components/ui";
 
 const OPTIMIZERS = ["COBYLA", "L-BFGS-B", "Nelder-Mead", "Powell", "SPSA", "ADAM", "BFGS", "SLSQP"];
 
@@ -49,7 +49,7 @@ export function CircuitPage() {
         </div>
         <Card title="Circuit"><CircuitView gates={r.gates} numQubits={r.num_qubits} labels={r.variables} /></Card>
         <Card title="Gate counts & conventions"><Json value={{ ops: r.summary.ops, conventions: r.conventions }} /></Card>
-        {r.text_diagram && <Card title="Qiskit text diagram"><pre className="overflow-auto text-xs">{r.text_diagram}</pre></Card>}
+        {r.text_diagram && <Card title="Qiskit text diagram"><pre tabIndex={0} role="region" aria-label="Qiskit text diagram" className={`overflow-auto text-xs ${FOCUS}`}>{r.text_diagram}</pre></Card>}
       </>}
     </Page>
   );
@@ -80,17 +80,17 @@ export function QaoaPage() {
       <JobHeader job={job} />
       {r && <>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Card><div className="label">⟨H⟩ optimised</div><div className="text-xl font-bold tabular-nums">{fmt(r.expected_energy)}</div><div className="text-xs text-slate-500">E_min {fmt(r.e_min)} · E_max {fmt(r.e_max)}</div></Card>
+          <Card><div className="label">⟨H⟩ optimised</div><div className="text-xl font-bold tabular-nums">{fmt(r.expected_energy)}</div><div className="text-xs text-slate-600 dark:text-slate-400">E_min {fmt(r.e_min)} · E_max {fmt(r.e_max)}</div></Card>
           <Card><div className="label">approximation ratio</div><div className="text-xl font-bold">{fmt(r.approximation_ratio, 3)}</div></Card>
           <Card><div className="label">P(ground state)</div><div className="text-xl font-bold">{fmt(r.ground_state_probability, 3)}</div></Card>
-          <Card><div className="label">circuit evaluations</div><div className="text-xl font-bold">{r.nfev}</div><div className="text-xs text-slate-500">{r.num_qubits} qubits · depth {r.circuit?.depth}</div></Card>
+          <Card><div className="label">circuit evaluations</div><div className="text-xl font-bold">{r.nfev}</div><div className="text-xs text-slate-600 dark:text-slate-400">{r.num_qubits} qubits · depth {r.circuit?.depth}</div></Card>
         </div>
         {r.warnings?.map((w: string) => <Note key={w} tone="warn">{w}</Note>)}
         <div className="grid gap-4 lg:grid-cols-2">
           <Card title="Convergence (best restart)"><HistoryChart history={r.history} /></Card>
           <Card title="Restarts"><table className="table"><thead><tr><th>#</th><th>⟨H⟩</th><th>evaluations</th><th>γ / β</th></tr></thead>
             <tbody>{r.restarts.map((x: any) => <tr key={x.restart}><td>{x.restart}</td><td className="tabular-nums">{fmt(x.expected_energy)}</td><td>{x.evaluations}</td><td className="font-mono text-xs">{x.params.map((v: number) => v.toFixed(3)).join(", ")}</td></tr>)}</tbody></table>
-            <p className="mt-2 text-xs text-slate-500">γ = [{r.gammas.map((v: number) => v.toFixed(4)).join(", ")}], β = [{r.betas.map((v: number) => v.toFixed(4)).join(", ")}] ({r.angle_convention})</p></Card>
+            <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">γ = [{r.gammas.map((v: number) => v.toFixed(4)).join(", ")}], β = [{r.betas.map((v: number) => v.toFixed(4)).join(", ")}] ({r.angle_convention})</p></Card>
         </div>
         <Card title={`Measured samples (${r.config.shots} shots, ranked: feasible first, then energy)`}><SamplesTable rows={r.ranked_samples} /></Card>
         <DomainView domain={r.domain} />
@@ -129,7 +129,7 @@ export function SimulatorPage() {
       {st && <Card title="Most probable basis states" actions={<KindBadge kind={st.execution_kind} />}>
         <p className="mb-2 text-sm">⟨H⟩ = <b>{fmt(st.expected_energy)}</b> (range {fmt(st.e_min)} … {fmt(st.e_max)}), P(ground) = <b>{fmt(st.ground_state_probability, 4)}</b></p>
         <div className="h-64"><ResponsiveContainer><BarChart data={st.top_states}><XAxis dataKey="bitstring" fontSize={9} angle={-45} textAnchor="end" height={60} /><YAxis fontSize={10} /><Tooltip formatter={(v: number) => v.toFixed(4)} /><Bar dataKey="probability" fill="#0ea5e9" /></BarChart></ResponsiveContainer></div>
-        <p className="text-xs text-slate-500">Bitstrings are in variable order (x0 first).</p>
+        <p className="text-xs text-slate-600 dark:text-slate-400">Bitstrings are in variable order (x0 first).</p>
       </Card>}
       {ls && <Card title="p = 1 landscape ⟨H⟩(γ, β)"><Landscape gammas={ls.gammas} betas={ls.betas} energies={ls.energies} /></Card>}
     </Page>
@@ -152,9 +152,9 @@ export function ProvidersPage() {
         <table className="table"><thead><tr><th>provider</th><th>technology</th><th>SDK</th><th>credentials</th><th>available</th><th>notes</th><th /></tr></thead>
           <tbody>{data.providers.map((p: any) => (
             <tr key={p.name}><td className="font-medium">{p.name}</td><td>{p.technology ?? (p.via ? `via ${p.via}` : "—")}</td>
-              <td>{p.sdk_installed === undefined ? "—" : p.sdk_installed ? "installed" : <span className="text-amber-600">missing ({p.sdk_module})</span>}</td>
-              <td>{p.missing_credentials?.length ? <span className="text-amber-600">missing {p.missing_credentials.join(", ")}</span> : p.indirect ? "—" : "configured"}</td>
-              <td>{p.available ? <span className="text-emerald-600">yes</span> : "no"}</td><td className="text-xs">{p.note ?? p.docs}</td>
+              <td>{p.sdk_installed === undefined ? "—" : p.sdk_installed ? "installed" : <span className="text-warn">missing ({p.sdk_module})</span>}</td>
+              <td>{p.missing_credentials?.length ? <span className="text-warn">missing {p.missing_credentials.join(", ")}</span> : p.indirect ? "—" : "configured"}</td>
+              <td>{p.available ? <span className="text-ok">yes</span> : "no"}</td><td className="text-xs">{p.note ?? p.docs}</td>
               <td>{!p.indirect && p.name !== "local_statevector" && <button className="btn-secondary" onClick={() => run(async () => setBackends({ ...backends, [p.name]: await api.get(`/providers/${p.name}/backends`) }))}>Backends</button>}</td></tr>))}</tbody></table>
       </Card>}
       {Object.entries(backends).map(([name, b]) => (

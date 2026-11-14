@@ -7,7 +7,7 @@ export function Page({ title, subtitle, actions, children }: { title: string; su
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-          {subtitle && <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{subtitle}</p>}
+          {subtitle && <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{subtitle}</p>}
         </div>
         {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
       </div>
@@ -48,7 +48,7 @@ export function Stat({ label, value, hint }: { label: string; value: ReactNode; 
     <div className="card">
       <div className="label">{label}</div>
       <div className="text-2xl font-bold tabular-nums">{value}</div>
-      {hint && <div className="mt-1 text-xs text-slate-500">{hint}</div>}
+      {hint && <div className="mt-1 text-xs text-slate-600 dark:text-slate-400">{hint}</div>}
     </div>
   );
 }
@@ -72,7 +72,15 @@ export function StatusBadge({ status }: { status: string }) {
 export function Json({ value, max = 400 }: { value: unknown; max?: number }) {
   const s = JSON.stringify(value, null, 2) ?? "";
   const lines = s.split("\n");
-  return <pre className="max-h-[28rem] overflow-auto rounded-lg bg-slate-900 p-3 font-mono text-xs text-slate-100">{lines.slice(0, max).join("\n")}{lines.length > max ? `\n… ${lines.length - max} more lines` : ""}</pre>;
+  return <pre tabIndex={0} role="region" aria-label="JSON output" className={`max-h-[28rem] overflow-auto rounded-lg bg-slate-900 p-3 font-mono text-xs text-slate-100 ${FOCUS}`}>{lines.slice(0, max).join("\n")}{lines.length > max ? `\n… ${lines.length - max} more lines` : ""}</pre>;
+}
+
+/** Visible keyboard focus ring for focusable non-control elements (WCAG 2.4.7). */
+export const FOCUS = "focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500";
+
+/** A scrollable box that keyboard users can reach and scroll (WCAG 2.1.1; axe scrollable-region-focusable). */
+export function ScrollRegion({ label, className = "", children }: { label: string; className?: string; children: ReactNode }) {
+  return <div role="region" aria-label={label} tabIndex={0} className={`overflow-auto ${FOCUS} ${className}`}>{children}</div>;
 }
 
 /** Label + control. The label is linked with htmlFor/id rather than wrapping the control, so a control's
@@ -89,13 +97,13 @@ export function Field({ label, children, hint }: { label: string; children: Reac
     <div className="block">
       <label className="label" htmlFor={id}>{label}</label>
       {control}
-      {hint && <span className="mt-1 block text-xs text-slate-500">{hint}</span>}
+      {hint && <span className="mt-1 block text-xs text-slate-600 dark:text-slate-400">{hint}</span>}
     </div>
   );
 }
 
 export function Spinner({ label = "Working…" }: { label?: string }) {
-  return <span className="inline-flex items-center gap-2 text-sm text-slate-500"><span className="h-3 w-3 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />{label}</span>;
+  return <span className="inline-flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400"><span className="h-3 w-3 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />{label}</span>;
 }
 
 /** Load data on mount / when deps change; returns [data, error, reload]. */

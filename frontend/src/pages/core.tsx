@@ -27,7 +27,7 @@ export function LoginPage() {
       <form onSubmit={submit} className="card w-full max-w-sm space-y-3">
         <div>
           <h1 className="text-xl font-bold">qopt</h1>
-          <p className="text-sm text-slate-500">QUBO / QAOA hybrid optimisation platform</p>
+          <p className="text-sm text-slate-600 dark:text-slate-400">QUBO / QAOA hybrid optimisation platform</p>
         </div>
         {boot && <Note tone="warn">No users exist yet. Create the first <b>administrator</b> account.</Note>}
         {boot && <Field label="Name"><input className="input" value={name} onChange={(e) => setName(e.target.value)} /></Field>}
@@ -59,18 +59,18 @@ export function OverviewPage() {
         <div className="grid gap-4 lg:grid-cols-3">
           <Card title="Jobs by kind" className="lg:col-span-1">
             {jobsByKind.length ? <div className="h-48"><ResponsiveContainer><BarChart data={jobsByKind}><XAxis dataKey="k" fontSize={11} /><YAxis allowDecimals={false} fontSize={11} /><Tooltip /><Bar dataKey="v" fill="#6366f1" /></BarChart></ResponsiveContainer></div>
-              : <p className="text-sm text-slate-500">No jobs yet. Try <Link className="text-indigo-600 underline" to="/industry">Industry Solutions</Link>.</p>}
+              : <p className="text-sm text-slate-600 dark:text-slate-400">No jobs yet. Try <Link className="text-indigo-600 underline" to="/industry">Industry Solutions</Link>.</p>}
           </Card>
           <Card title="Execution environment" className="lg:col-span-2">
             <ul className="space-y-1 text-sm">
-              <li>AI agents: {ov.agents_available ? <span className="text-emerald-600">available</span> : <span className="text-amber-600">unavailable — no Anthropic API credentials on the server</span>}</li>
+              <li>AI agents: {ov.agents_available ? <span className="text-ok">available</span> : <span className="text-warn">unavailable — no Anthropic API credentials on the server</span>}</li>
               <li>Quantum execution available: {ov.providers_available.join(", ")}</li>
-              {providers && <li>Real hardware providers configured: {(providers.providers as any[]).filter((p) => p.available && !["local_statevector", "qiskit_aer"].includes(p.name)).map((p) => p.name).join(", ") || <span className="text-amber-600">none (SIMULATOR mode)</span>}</li>}
+              {providers && <li>Real hardware providers configured: {(providers.providers as any[]).filter((p) => p.available && !["local_statevector", "qiskit_aer"].includes(p.name)).map((p) => p.name).join(", ") || <span className="text-warn">none (SIMULATOR mode)</span>}</li>}
             </ul>
           </Card>
         </div>
         <Card title="Recent jobs">
-          {ov.recent_jobs.length === 0 ? <p className="text-sm text-slate-500">No jobs yet.</p> : (
+          {ov.recent_jobs.length === 0 ? <p className="text-sm text-slate-600 dark:text-slate-400">No jobs yet.</p> : (
             <table className="table"><thead><tr><th>id</th><th>kind</th><th>solver/agent</th><th>status</th><th>execution</th><th>runtime</th><th>created</th></tr></thead>
               <tbody>{ov.recent_jobs.map((j: any) => (
                 <tr key={j.id}><td><Link className="text-indigo-600 underline" to={`/results?job=${j.id}`}>#{j.id}</Link></td><td>{j.kind}</td><td>{j.solver ?? "—"}</td><td><StatusBadge status={j.status} /></td>

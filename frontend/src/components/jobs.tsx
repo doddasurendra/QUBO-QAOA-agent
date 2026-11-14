@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { api, waitForJob } from "../api";
-import { Card, ErrorBox, fmt, KindBadge, Note, Spinner, StatusBadge } from "./ui";
+import { Card, ErrorBox, FOCUS, fmt, KindBadge, Note, Spinner, StatusBadge } from "./ui";
 
 /** Submit a job and follow it to completion. */
 export function useJob() {
@@ -30,13 +30,13 @@ export function JobHeader({ job }: { job: any }) {
       <span>Job <Link className="text-indigo-600 underline" to={`/results?job=${job.id}`}>#{job.id}</Link></span>
       <StatusBadge status={job.status} />
       <KindBadge kind={job.execution_kind} real={job.is_real_hardware} />
-      {job.runtime_s != null && <span className="text-slate-500">{fmt(job.runtime_s, 2)} s</span>}
+      {job.runtime_s != null && <span className="text-slate-600 dark:text-slate-400">{fmt(job.runtime_s, 2)} s</span>}
       {["queued", "running"].includes(job.status) && <Spinner label={job.status} />}
       {job.status === "done" && <>
         <button className="btn-secondary" onClick={() => api.download(`/reports/jobs/${job.id}?format=md`, `job-${job.id}-report.md`)}>Report (.md)</button>
         <button className="btn-secondary" onClick={() => api.download(`/reports/jobs/${job.id}?format=json`, `job-${job.id}.json`)}>Raw (.json)</button>
       </>}
-      {job.error && <span className="text-rose-600">{job.error}</span>}
+      {job.error && <span className="text-bad">{job.error}</span>}
     </div>
   );
 }
@@ -61,16 +61,16 @@ export function HistoryChart({ history, label = "⟨H⟩ per evaluation" }: { hi
 }
 
 export function SamplesTable({ rows, max = 15 }: { rows: any[]; max?: number }) {
-  if (!rows?.length) return <p className="text-sm text-slate-500">No samples.</p>;
+  if (!rows?.length) return <p className="text-sm text-slate-600 dark:text-slate-400">No samples.</p>;
   const hasFeas = rows.some((r) => "feasible" in r);
   return (
-    <div className="overflow-auto">
+    <div role="region" aria-label="Measured samples" tabIndex={0} className={`overflow-auto ${FOCUS}`}>
       <table className="table">
         <thead><tr><th>assignment (x0…)</th><th>count</th><th>freq</th><th>QUBO energy</th>{hasFeas && <><th>feasible</th><th>objective</th></>}</tr></thead>
         <tbody>{rows.slice(0, max).map((r, k) => (
           <tr key={k}><td className="font-mono text-xs">{r.decision_bitstring ?? r.bitstring}</td><td>{r.count}</td><td>{fmt(r.frequency, 3)}</td>
             <td className="tabular-nums">{fmt(r.qubo_energy)}</td>
-            {hasFeas && <><td>{r.feasible ? "✓" : <span className="text-rose-600">✗</span>}</td><td className="tabular-nums">{fmt(r.objective)}</td></>}</tr>
+            {hasFeas && <><td>{r.feasible ? <>✓<span className="sr-only"> feasible</span></> : <span className="text-bad">✗<span className="sr-only"> infeasible</span></span>}</td><td className="tabular-nums">{fmt(r.objective)}</td></>}</tr>
         ))}</tbody>
       </table>
     </div>
@@ -80,16 +80,16 @@ export function SamplesTable({ rows, max = 15 }: { rows: any[]; max?: number }) 
 export function RankingTable({ ranking }: { ranking: any[] }) {
   if (!ranking?.length) return null;
   return (
-    <div className="overflow-auto">
+    <div role="region" aria-label="Solver ranking" tabIndex={0} className={`overflow-auto ${FOCUS}`}>
       <table className="table">
         <thead><tr><th>#</th><th>solver</th><th>execution</th><th>QUBO energy</th><th>objective</th><th>feasible</th><th>gap to best</th></tr></thead>
         <tbody>{ranking.map((r) => (
           <tr key={r.solver}><td>{r.rank}</td><td className="font-medium">{r.solver}</td><td><KindBadge kind={r.execution_kind} real={r.is_real_hardware} /></td>
-            <td className="tabular-nums">{fmt(r.qubo_energy)}</td><td className="tabular-nums">{fmt(r.objective)}</td><td>{r.feasible === false ? <span className="text-rose-600">✗</span> : r.feasible ? "✓" : "—"}</td>
+            <td className="tabular-nums">{fmt(r.qubo_energy)}</td><td className="tabular-nums">{fmt(r.objective)}</td><td>{r.feasible === false ? <span className="text-bad">✗<span className="sr-only"> infeasible</span></span> : r.feasible ? <>✓<span className="sr-only"> feasible</span></> : "—"}</td>
             <td className="tabular-nums">{fmt(r.gap_to_best)}</td></tr>
         ))}</tbody>
       </table>
-      <p className="mt-1 text-xs text-slate-500">Reference: {ranking[0].reference}.</p>
+      <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">Reference: {ranking[0].reference}.</p>
     </div>
   );
 }

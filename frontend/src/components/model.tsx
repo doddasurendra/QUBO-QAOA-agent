@@ -62,7 +62,7 @@ export function ModelPicker({ compact = false }: { compact?: boolean }) {
 
   return (
     <Card title="Active model" actions={compact && <button className="btn-secondary" onClick={() => setOpen(!open)}>{open ? "Hide" : "Change"}</button>}>
-      <div className="mb-2 text-sm">{active ? <span>Using <b>{active.label}</b></span> : <span className="text-amber-600">No model selected — choose one below.</span>}</div>
+      <div className="mb-2 text-sm">{active ? <span>Using <b>{active.label}</b></span> : <span className="text-warn">No model selected — choose one below.</span>}</div>
       {open && (
         <div className="space-y-3">
           <div className="flex flex-wrap gap-1">
@@ -102,7 +102,7 @@ export function ModelPicker({ compact = false }: { compact?: boolean }) {
                   </select>
                 </Field>
               </div>
-              <textarea className="input h-56 font-mono text-xs" value={text} onChange={(e) => setText(e.target.value)} spellCheck={false} />
+              <textarea className="input h-56 font-mono text-xs" aria-label="Template input data (JSON)" value={text} onChange={(e) => setText(e.target.value)} spellCheck={false} />
               <button className="btn" onClick={() => {
                 try { const data = JSON.parse(text); setActive({ ref: { industry: { key: ikey, data } }, label: `${probs.find((p) => p.key === ikey)?.title}` }); setOpen(false); }
                 catch (e) { setErr(new Error(`Invalid JSON: ${(e as Error).message}`)); }
@@ -111,7 +111,7 @@ export function ModelPicker({ compact = false }: { compact?: boolean }) {
           )}
           {(mode === "spec" || mode === "qubo") && (
             <>
-              <textarea className="input h-56 font-mono text-xs" value={text} onChange={(e) => setText(e.target.value)} spellCheck={false} />
+              <textarea className="input h-56 font-mono text-xs" aria-label={mode === "spec" ? "Model specification (JSON)" : "QUBO (JSON)"} value={text} onChange={(e) => setText(e.target.value)} spellCheck={false} />
               <button className="btn" onClick={() => useJson(mode)}>Use this {mode === "spec" ? "model" : "QUBO"}</button>
             </>
           )}

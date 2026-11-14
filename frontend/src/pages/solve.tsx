@@ -3,7 +3,7 @@ import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAx
 import { api } from "../api";
 import { DomainView, JobHeader, RankingTable, SamplesTable, useJob } from "../components/jobs";
 import { RequireModel, useActiveModel } from "../components/model";
-import { Card, ErrorBox, Field, fmt, Json, KindBadge, Note, Page, useAction, useLoad } from "../components/ui";
+import { Card, ErrorBox, Field, FOCUS, fmt, Json, KindBadge, Note, Page, useAction, useLoad } from "../components/ui";
 
 const CLASSICAL = {
   exhaustive: {}, milp: { time_limit: 60 }, simulated_annealing: { num_reads: 20, num_sweeps: 1000, seed: 7 },
@@ -34,7 +34,7 @@ export function ClassicalPage() {
           <Card><div className="label">feasible</div><div className="text-xl font-bold">{r.evaluation ? (r.evaluation.feasible ? "yes" : "no") : "n/a"}</div></Card>
           <Card><div className="label">objective</div><div className="text-xl font-bold tabular-nums">{fmt(r.evaluation?.objective)}</div></Card>
         </div>
-        <Card title="Best assignment"><p className="font-mono text-sm">{r.evaluation?.bitstring ?? r.best_bitstring}</p><p className="text-xs text-slate-500">{r.evaluation?.bit_order ?? r.bit_order}</p></Card>
+        <Card title="Best assignment"><p className="font-mono text-sm">{r.evaluation?.bitstring ?? r.best_bitstring}</p><p className="text-xs text-slate-600 dark:text-slate-400">{r.evaluation?.bit_order ?? r.bit_order}</p></Card>
         <Card title="Samples"><SamplesTable rows={r.samples.map((s: any) => ({ ...s, qubo_energy: s.energy }))} /></Card>
         <DomainView domain={r.domain} />
         <Card title="Solver metadata"><Json value={r.metadata} /></Card>
@@ -70,7 +70,7 @@ export function HybridPage() {
           <div className="mb-2 w-32"><Field label="QAOA depth p"><input className="input" type="number" min={1} max={8} value={p} onChange={(e) => setP(Number(e.target.value))} /></Field></div>
           {rec && <table className="table"><thead><tr><th /><th>solver</th><th>kind</th><th>recommended</th><th>reasons</th></tr></thead>
             <tbody>{rec.recommendations.map((x: any) => (
-              <tr key={x.solver}><td>{runnable.has(x.solver) && <input type="checkbox" checked={selected.includes(x.solver)} onChange={(e) => setSelected(e.target.checked ? [...selected, x.solver] : selected.filter((s) => s !== x.solver))} />}</td>
+              <tr key={x.solver}><td>{runnable.has(x.solver) && <input type="checkbox" aria-label={`Run ${x.solver}`} checked={selected.includes(x.solver)} onChange={(e) => setSelected(e.target.checked ? [...selected, x.solver] : selected.filter((s) => s !== x.solver))} />}</td>
                 <td className="font-medium">{x.solver}</td><td><KindBadge kind={x.execution_kind} /></td><td>{x.recommended ? "✓" : "—"}</td><td className="text-xs">{x.reasons.join(" · ")}{x.requires_approval ? " · requires admin approval (Hardware Providers page)" : ""}</td></tr>))}</tbody></table>}
           <div className="mt-3 flex flex-wrap items-end gap-3">
             <Field label="Also sample on Aer (simulator)"><select className="input" value={aer} onChange={(e) => setAer(e.target.value)}><option value="">no</option><option value="aer_ideal">aer_ideal</option><option value="aer_noisy_depolarizing">aer_noisy_depolarizing (synthetic noise)</option></select></Field>
@@ -129,10 +129,10 @@ export function IndustryPage() {
           {desc.limitations && <Note tone="warn">Limitation: {desc.limitations}</Note>}
           <details className="mt-2"><summary className="cursor-pointer text-sm">Input schema</summary><Json value={desc.input_schema} /></details>
         </Card>
-        <Card title="Input data" actions={<select className="input w-56" defaultValue="" onChange={async (e) => { if (e.target.value) setText(JSON.stringify((await api.get(`/datasets/${e.target.value}`)).content, null, 2)); }}>
+        <Card title="Input data" actions={<select className="input w-56" aria-label="Load a saved dataset" defaultValue="" onChange={async (e) => { if (e.target.value) setText(JSON.stringify((await api.get(`/datasets/${e.target.value}`)).content, null, 2)); }}>
           <option value="">Load dataset…</option>{datasets?.filter((d: any) => d.problem_key === key).map((d: any) => <option key={d.id} value={d.id}>{d.name}</option>)}</select>}>
           <Note>The pre-filled example is <b>SAMPLE data</b> for demonstration. Replace it with your own figures.</Note>
-          <textarea className="input mt-2 h-72 font-mono text-xs" value={text} onChange={(e) => setText(e.target.value)} spellCheck={false} />
+          <textarea className="input mt-2 h-72 font-mono text-xs" aria-label="Input data (JSON)" value={text} onChange={(e) => setText(e.target.value)} spellCheck={false} />
           <div className="mt-2 flex flex-wrap gap-2">
             <button className="btn-secondary" disabled={a.busy} onClick={() => a.run(async () => setForm(await api.post(`/industries/${key}/formulate`, { data: data() })))}>Formulate & inspect</button>
             <button className="btn-secondary" disabled={a.busy} onClick={() => a.run(async () => { const f = await api.post(`/industries/${key}/formulate`, { data: data(), save_as: `${desc.title} ${new Date().toLocaleString()}` }); setForm(f); setActive({ ref: { experiment_id: f.experiment_id }, label: `Experiment #${f.experiment_id} ${desc.title}` }); })}>Save as experiment</button>
@@ -189,11 +189,11 @@ export function BenchmarkPage() {
             {solversInChart.map((s, i) => <Bar key={s} dataKey={s} fill={palette[i % palette.length]} />)}</BarChart></ResponsiveContainer></div>
         </Card>
         <Card title="Results">
-          <div className="overflow-auto"><table className="table"><thead><tr><th>problem</th><th>n</th><th>qubits</th><th>solver</th><th>kind</th><th>hit rate</th><th>norm. gap</th><th>runtime (s)</th><th>approx. ratio</th><th>P(ground)</th></tr></thead>
+          <div role="region" aria-label="Benchmark results" tabIndex={0} className={`overflow-auto ${FOCUS}`}><table className="table"><thead><tr><th>problem</th><th>n</th><th>qubits</th><th>solver</th><th>kind</th><th>hit rate</th><th>norm. gap</th><th>runtime (s)</th><th>approx. ratio</th><th>P(ground)</th></tr></thead>
             <tbody>{r.rows.map((x: any, i: number) => <tr key={i}><td>{x.problem}</td><td>{x.n}</td><td>{x.qubo_variables}</td><td>{x.solver}</td><td><KindBadge kind={x.execution_kind} /></td><td>{fmt(x.optimum_hit_rate, 2)}</td>
               <td className="tabular-nums">{fmt(x.normalized_gap.mean)} ± {fmt(x.normalized_gap.std)}</td><td className="tabular-nums">{fmt(x.runtime_s.mean, 4)}</td>
               <td>{x.approximation_ratio ? fmt(x.approximation_ratio.mean, 3) : ""}</td><td>{x.ground_state_probability ? fmt(x.ground_state_probability.mean, 3) : ""}</td></tr>)}</tbody></table></div>
-          <ul className="mt-2 text-xs text-slate-500">{Object.entries(r.definitions).map(([k, v]) => <li key={k}><b>{k}</b>: {String(v)}</li>)}</ul>
+          <ul className="mt-2 text-xs text-slate-600 dark:text-slate-400">{Object.entries(r.definitions).map(([k, v]) => <li key={k}><b>{k}</b>: {String(v)}</li>)}</ul>
         </Card>
       </>}
     </Page>

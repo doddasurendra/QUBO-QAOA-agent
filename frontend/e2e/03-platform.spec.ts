@@ -20,7 +20,7 @@ test("admin creates a user; the role change is reflected in the table", async ({
   await page.getByPlaceholder("initial password (≥10)").fill(VIEWER_PASSWORD);
   await page.locator("section", { hasText: "Create user" }).locator("select").selectOption("viewer");
   await page.getByRole("button", { name: "Create" }).click();
-  await expect(page.getByRole("cell", { name: viewerEmail() })).toBeVisible();
+  await expect(page.getByRole("cell", { name: viewerEmail(), exact: true })).toBeVisible();
 });
 
 test("RBAC: a researcher cannot see or open admin pages", async ({ page }) => {

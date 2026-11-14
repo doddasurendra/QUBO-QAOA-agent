@@ -23,7 +23,8 @@ so no real-QPU job and no live Claude API call has been made.
 | 7 | Multi-echelon supply chain (two-echelon network design, multi-echelon replenishment) | done | `3f29e69` |
 | 8 | Installed-package deployment fix (migrations packaged, configurable paths, Docker/env hardening) | done | `9c885a2` |
 | 9 | Browser E2E tests (Playwright, all 24 pages, CI job) + the bugs they found | done | `3be2f9c`, `cdba55b` |
-| 10 | E2E in Firefox and WebKit as well as Chromium (94 tests), CI browser matrix | done | see `git log` |
+| 10 | E2E in Firefox and WebKit as well as Chromium (94 tests), CI browser matrix | done | `f26a147` |
+| 11 | axe-core WCAG 2.1 A/AA audit of every page + all violations fixed | done | see `git log` |
 
 ## Completed (implemented + tested)
 
@@ -42,6 +43,7 @@ so no real-QPU job and no live Claude API call has been made.
 | Persistence | SQLAlchemy 2 models (9 tables), Alembic migration `0001` **shipped inside the package** (`qopt/migrations`), SQLite default / PostgreSQL URL | migrations run in every API test and from an installed package |
 | API & security | JWT + hashed API keys, RBAC admin/researcher/viewer, bootstrap-once admin, login throttling, per-user & per-IP rate limits, upload limits, schema validation, job quotas & timeouts, approval workflow, audit log with secret redaction, security headers, structured JSON logs; production refuses missing or weak JWT secrets | `tests/test_api.py` (16), `tests/test_deployment.py` (6) |
 | Frontend | 24 pages wired to real endpoints, industry templates grouped by sector, execution-kind badges, SAMPLE data labelled, form labels linked with `htmlFor`/`id` | `tsc` clean, `vite build` OK; **94 Playwright browser E2E tests** in Chromium, Firefox and WebKit against the real backend (below) |
+| Accessibility | axe-core 4.10 with WCAG 2.0/2.1 A + AA rules on the login screen, all 24 pages, result views (compiled QUBO, validation, circuit, industry formulation), hovered buttons and the mobile menu: **0 violations**. Fixed to get there: contrast of sidebar labels, status text, secondary text on tinted rows/bubbles and button hover states; names for every unlabelled input/select/textarea/checkbox and icon-only button; keyboard access + focus ring for every scroll region; screen-reader text for ✓/✗ | `frontend/e2e/04-accessibility.spec.ts` (28 checks, chromium) |
 | Browser E2E | Playwright in **Chromium 131, Firefox 132 and WebKit 18.2** against the real backend and production build: admin bootstrap via the UI, all 24 pages via the sidebar, every optimisation workflow (builder → validation → matrix/CSV → Ising → circuit/QASM → QAOA → simulator → classical → hybrid → industry → benchmark → report download → experiment history), RBAC for admin/researcher/viewer, API keys, datasets, research upload/search, agents-unavailable state, hardware approval reject + refused approve, admin config/audit, docs, sign-out, mobile layout. Any console error, uncaught exception, 5xx or unexpected 4xx fails a test | `frontend/e2e/`: 1 setup + 31 tests × 3 browsers = 94, all passed in two consecutive full runs; CI matrix job `e2e (chromium / firefox / webkit)` |
 | Deployment | Dockerfile (installs the package, runs from `/app`, non-root, healthcheck), `.dockerignore`, docker-compose with PostgreSQL, `.env.example` covering every setting, GitHub Actions CI | installed-package runtime verified live, 12/12 checks (below); `docker build` not run here |
 
@@ -80,15 +82,23 @@ so no real-QPU job and no live Claude API call has been made.
 - **`docker build` / `docker compose up` and PostgreSQL not run.** Docker, WSL2 and PostgreSQL are not installed on
   this machine, and installing Docker Desktop needs WSL2/Hyper-V enabled with admin rights and a reboot. The
   runtime the image uses (installed package, production mode, same paths) is verified; CI builds the image.
+- **Not yet re-run after the accessibility fixes:** the 93 functional browser tests (01–03 specs). The three-browser
+  regression run was stopped by Claude Code for low system memory (≈ 1 GB free of 7.9 GB, mostly other applications).
+  The accessibility audit (29/29) and the typecheck pass on the final code, and the locators were reviewed against the
+  markup changes, but that is not a run. Re-run with `cd frontend; npm run e2e` when memory allows.
 - **Not yet run:** a single-browser invocation (`--project=webkit` / `firefox`), which is how each CI matrix job runs.
   A local WebKit-only run was stopped by Claude Code because the machine ran out of memory (0.5 GB free of 7.9 GB,
   mostly other applications); the setup project's browser was then made explicit (Chromium, same as its implicit
   default) without a re-run. The first CI run will exercise this.
 - **Browser coverage:** E2E runs Playwright's builds of Chromium, Firefox and WebKit. WebKit approximates Safari but is
   not the shipping Safari on macOS/iOS, and none of the runs was on a real phone (mobile is an emulated viewport).
-  Tests check behaviour, not visual appearance (no screenshot comparison); automated accessibility auditing (e.g.
-  axe) is not included. The installed Microsoft Edge crashed under automation after file downloads, so local runs
-  use Playwright's pinned Chromium.
+  Tests check behaviour, not visual appearance (no screenshot comparison). The installed Microsoft Edge crashed under
+  automation after file downloads, so local runs use Playwright's pinned Chromium.
+- **Accessibility limits:** axe finds roughly a third to a half of WCAG issues; it cannot judge keyboard flow, focus
+  order, screen-reader announcements of live updates (e.g. job progress), or whether labels are meaningful. No manual
+  screen-reader (NVDA/VoiceOver) or keyboard-only walkthrough has been done. The audit runs in light mode only (dark
+  mode colours were chosen to pass but are not audited), and agent-chat result bubbles cannot be audited without an
+  API key. Charts (Recharts, SVG heatmaps) expose a label but no tabular alternative of their data.
 - Jobs run on an in-process thread pool and rate limits are in-process; Redis is not implemented → run a single API
   process. Running jobs cannot be interrupted (a timeout marks the status; late results are stored with `late=true`).
 - Statevector QAOA ≤ 22 qubits; exhaustive validation ≤ 20 decision variables. Slack-heavy examples (operating
@@ -136,7 +146,8 @@ so no real-QPU job and no live Claude API call has been made.
 1. On a Docker host: `docker compose up --build`, confirm the container is `healthy`, and run the suite against PostgreSQL.
 2. With credentials: a real IBM job end-to-end through the approval flow; Braket/D-Wave integration tests.
 3. With an API key: agent evaluations on the three natural-language example prompts; tune prompts and effort.
-4. Add axe accessibility checks and visual regression to E2E; run on real Safari / mobile devices; code-split the bundle.
+4. Manual screen-reader + keyboard-only review; audit dark mode; live-region announcements for job progress; data-table
+   alternatives for charts; visual regression; real Safari / mobile devices; code-split the bundle.
 5. Redis-backed job queue and rate limiting for multi-replica deployments; cooperative cancellation.
 6. Slack-free encodings for the slack-heavy modules so they fit simulator limits; lead times and plant capacity
    in multi-echelon replenishment; scenario-based (stochastic) renewable planning.

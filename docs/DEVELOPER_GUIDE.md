@@ -57,6 +57,22 @@ error, an uncaught exception, any 5xx, or a 4xx that the test did not explicitly
 Ising → circuit + QASM → QAOA → simulator → classical → hybrid → industry → benchmark → reports → experiment history),
 `03-platform` (users/RBAC incl. viewer, API keys, datasets, research upload + search, agents unavailable, hardware
 approval reject + refused approve, admin config/audit, usage, docs, sign-out, mobile menu + no horizontal scroll).
+### Accessibility (axe-core)
+
+`04-accessibility.spec.ts` runs axe-core (`@axe-core/playwright`) with the **WCAG 2.0/2.1 A + AA** rule sets on the
+login screen, all 24 pages, key result views (compiled QUBO, validation report, circuit, industry formulation),
+hovered primary/danger buttons and the open mobile menu, and fails on any violation with the offending elements and
+colours. It runs in chromium only (axe checks the DOM/ARIA tree, which is engine-independent). Conventions it enforces:
+
+- Every form control has an accessible name: wrap it in `Field` (label linked with `htmlFor`/`id`), or give it an
+  `aria-label` that names *which* item it edits (e.g. `Constraint cap: coefficient of x1`). A placeholder is not a label.
+- Icon-only buttons (✕) get an `aria-label`; meaningful symbols (✓/✗) get `sr-only` text.
+- Scrollable boxes use `ScrollRegion` or `role="region" aria-label tabIndex={0}` plus the `FOCUS` ring.
+- Status colours: use `.text-ok` / `.text-warn` / `.text-bad`; secondary text is `text-slate-600 dark:text-slate-400`.
+  Do not use `-400`/`-500` text shades or lighter hover backgrounds on white text (all fail 4.5:1 somewhere).
+
+`npx playwright test e2e/04-accessibility.spec.ts --project=chromium` runs just the audit.
+
 The active model is per browser tab, so each test selects it (`useExperiment`). Set `QOPT_PYTHON` if the venv is not
 at `<repo>/.venv`, and `PW_CHANNEL=msedge|chrome` to run the chromium project in an installed browser (Edge crashed
 after downloads here).

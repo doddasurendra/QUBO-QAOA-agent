@@ -31,12 +31,12 @@ export default function App() {
         <aside className={`${menu ? "block" : "hidden"} fixed inset-y-0 z-20 w-64 overflow-y-auto border-r border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900 md:static md:block`}>
           <div className="mb-4 px-2">
             <div className="text-lg font-bold">qopt</div>
-            <div className="text-xs text-slate-500">QUBO · QAOA · Hybrid optimisation</div>
+            <div className="text-xs text-slate-600 dark:text-slate-400">QUBO · QAOA · Hybrid optimisation</div>
           </div>
           <nav className="space-y-4" onClick={() => setMenu(false)}>
             {NAV.map((g) => (
               <div key={g.group}>
-                <div className="px-2 text-[11px] font-semibold uppercase tracking-wider text-slate-400">{g.group}</div>
+                <div className="px-2 text-[11px] font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400">{g.group}</div>
                 {g.items.filter((i) => !i.role || can(user, i.role)).map((i) => (
                   <NavLink key={i.to} to={i.to} end={i.to === "/"} className={({ isActive }) =>
                     `block rounded-md px-2 py-1 text-sm ${isActive ? "bg-indigo-50 font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300" : "text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"}`}>{i.label}</NavLink>
@@ -46,7 +46,7 @@ export default function App() {
           </nav>
           <div className="mt-6 border-t border-slate-200 px-2 pt-3 text-xs dark:border-slate-800">
             <div className="truncate font-medium">{user.email}</div>
-            <div className="text-slate-500">role: {user.role}</div>
+            <div className="text-slate-600 dark:text-slate-400">role: {user.role}</div>
             <button className="btn-secondary mt-2" onClick={logout}>Sign out</button>
           </div>
         </aside>

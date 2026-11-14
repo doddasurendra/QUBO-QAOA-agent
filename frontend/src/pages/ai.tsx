@@ -17,10 +17,10 @@ function Transcript({ steps }: { steps: any[] }) {
     <ol className="space-y-1 text-xs">
       {steps.map((s, i) => s.type === "tool" ? (
         <li key={i} className="rounded border border-slate-200 p-1.5 dark:border-slate-800">
-          <span className="font-mono font-semibold">🔧 {s.tool}</span> <span className="text-slate-500">{fmt(s.duration_s, 2)}s</span>
-          {s.error && <span className="ml-2 text-rose-600">{s.error}</span>}
-          {s.questions && <span className="ml-2 text-amber-600">asked the user {s.questions.length} question(s)</span>}
-          <details><summary className="cursor-pointer text-slate-500">input / output</summary><Json value={{ input: s.input, output: s.output_preview?.slice(0, 1500) }} max={60} /></details>
+          <span className="font-mono font-semibold">🔧 {s.tool}</span> <span className="text-slate-600 dark:text-slate-400">{fmt(s.duration_s, 2)}s</span>
+          {s.error && <span className="ml-2 text-bad">{s.error}</span>}
+          {s.questions && <span className="ml-2 text-warn">asked the user {s.questions.length} question(s)</span>}
+          <details><summary className="cursor-pointer text-slate-600 dark:text-slate-400">input / output</summary><Json value={{ input: s.input, output: s.output_preview?.slice(0, 1500) }} max={60} /></details>
           {s.delegated_steps && <div className="ml-3 mt-1 border-l pl-2"><Transcript steps={s.delegated_steps} /></div>}
         </li>
       ) : s.text ? <li key={i} className="text-slate-600 dark:text-slate-300">💬 {s.text.slice(0, 300)}{s.text.length > 300 ? "…" : ""}</li> : null)}
@@ -66,8 +66,8 @@ function AgentChat({ agent, title, placeholder }: { agent: string; title: string
               {t.job && <div className="mt-2 space-y-2 border-t pt-2 text-xs dark:border-slate-700">
                 <div className="flex flex-wrap items-center gap-2"><StatusBadge status={t.job.result.status} /><span>{t.job.result.usage.requests} model calls · {t.job.result.usage.input_tokens + t.job.result.usage.output_tokens} tokens · ≈ ${fmt(t.job.result.usage.cost_usd, 4)}</span>
                   {t.job.result.model_ids.length > 0 && <span>models saved as experiments</span>}
-                  {t.job.result.approvals.length > 0 && <span className="text-amber-600">hardware approval requested (#{t.job.result.approvals.join(", ")})</span>}</div>
-                {t.job.result.error && <span className="text-rose-600">{t.job.result.error}</span>}
+                  {t.job.result.approvals.length > 0 && <span className="text-warn">hardware approval requested (#{t.job.result.approvals.join(", ")})</span>}</div>
+                {t.job.result.error && <span className="text-bad">{t.job.result.error}</span>}
                 <details><summary className="cursor-pointer">Tool calls ({t.job.result.steps.filter((s: any) => s.type === "tool").length})</summary><Transcript steps={t.job.result.steps} /></details>
               </div>}
             </div>
@@ -75,12 +75,12 @@ function AgentChat({ agent, title, placeholder }: { agent: string; title: string
           {busy && <Spinner label="Agent working (calling tools)…" />}
           <ErrorBox error={err} />
           <div className="flex gap-2">
-            <textarea className="input h-20" placeholder={placeholder} value={msg} onChange={(e) => setMsg(e.target.value)} disabled={!available || busy}
+            <textarea className="input h-20" aria-label="Message to the agent" placeholder={placeholder} value={msg} onChange={(e) => setMsg(e.target.value)} disabled={!available || busy}
               onKeyDown={(e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) send(msg); }} />
             <div className="flex flex-col gap-2"><button className="btn" disabled={!available || busy || !msg.trim()} onClick={() => send(msg)}>Send</button>
               <button className="btn-secondary" disabled={busy} onClick={() => { setTurns([]); setLast(undefined); }}>New</button></div>
           </div>
-          <p className="text-xs text-slate-500">Ctrl+Enter to send. Follow-ups continue the same conversation. Models the agent creates appear in Experiments — <button className="underline" onClick={() => api.get("/experiments").then((x) => x[0] && setActive({ ref: { experiment_id: x[0].id }, label: `Experiment #${x[0].id} ${x[0].name}` }))}>use the latest as active model</button>.</p>
+          <p className="text-xs text-slate-600 dark:text-slate-400">Ctrl+Enter to send. Follow-ups continue the same conversation. Models the agent creates appear in Experiments — <button className="underline" onClick={() => api.get("/experiments").then((x) => x[0] && setActive({ ref: { experiment_id: x[0].id }, label: `Experiment #${x[0].id} ${x[0].name}` }))}>use the latest as active model</button>.</p>
         </div>
       </Card>
     </div>
@@ -105,14 +105,14 @@ export function AgentsPage() {
       {info && <>
         <Card title="Configuration">
           <ul className="text-sm"><li>Model: <code>{info.credentials.model}</code></li><li>Credentials on server: {info.credentials.api_credentials_in_env ? "yes" : "no"}</li>
-            <li>Budget per run: ${info.budgets.per_run_usd} · per user per day: ${info.budgets.per_user_daily_usd}</li><li className="text-xs text-slate-500">{info.credentials.note}</li></ul>
+            <li>Budget per run: ${info.budgets.per_run_usd} · per user per day: ${info.budgets.per_user_daily_usd}</li><li className="text-xs text-slate-600 dark:text-slate-400">{info.credentials.note}</li></ul>
         </Card>
         <div className="grid gap-3 md:grid-cols-2">
           {info.agents.map((a: any) => (
             <Card key={a.name} title={a.title} actions={<button className={agent === a.name ? "btn" : "btn-secondary"} onClick={() => setAgent(a.name)}>Chat</button>}>
               <p className="text-sm">{a.role}</p>
               <div className="mt-2 flex flex-wrap gap-1">{a.tools.map((t: any) => <span key={t.name} className={`badge ${t.requires_approval ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200"}`}>{t.name}{t.requires_approval ? " (approval)" : ""}</span>)}</div>
-              {a.can_delegate.length > 0 && <p className="mt-2 text-xs text-slate-500">Can delegate to: {a.can_delegate.join(", ")}</p>}
+              {a.can_delegate.length > 0 && <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">Can delegate to: {a.can_delegate.join(", ")}</p>}
             </Card>))}
         </div>
         <div><div className="label">Selected agent</div><div className="font-mono text-sm">{agent}</div></div>

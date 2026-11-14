@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { FOCUS } from "./ui";
 
 /** Diverging heatmap for a QUBO matrix (blue negative, red positive). */
 export function MatrixHeatmap({ matrix, labels }: { matrix: number[][]; labels: string[] }) {
@@ -15,7 +16,7 @@ export function MatrixHeatmap({ matrix, labels }: { matrix: number[][]; labels: 
   const showLabels = n <= 24;
   const pad = showLabels ? 70 : 4;
   return (
-    <div className="overflow-auto">
+    <div role="region" aria-label="QUBO matrix (scrollable)" tabIndex={0} className={`overflow-auto ${FOCUS}`}>
       <svg width={pad + n * cell + 4} height={pad + n * cell + 4} role="img" aria-label="QUBO matrix heatmap">
         {showLabels && labels.map((l, k) => (
           <g key={k}>
@@ -29,7 +30,7 @@ export function MatrixHeatmap({ matrix, labels }: { matrix: number[][]; labels: 
             onMouseEnter={() => setHover({ i, j })} onMouseLeave={() => setHover(null)} />
         )))}
       </svg>
-      <div className="mt-2 h-5 text-xs text-slate-500">
+      <div className="mt-2 h-5 text-xs text-slate-600 dark:text-slate-400">
         {hover ? <>Q[{labels[hover.i]}, {labels[hover.j]}] = <b className="tabular-nums">{matrix[hover.i][hover.j]}</b></> : <>Hover a cell. Blue = negative, red = positive, scale ±{max.toPrecision(3)}.</>}
       </div>
     </div>
@@ -52,12 +53,12 @@ export function CircuitView({ gates, numQubits, labels }: { gates: Gate[]; numQu
     cols.push({ g, col: c });
   }
   const ncol = Math.max(1, ...level);
-  if (ncol > 400) return <p className="text-sm text-slate-500">Circuit has {ncol} layers — too deep to draw; see gate counts and QASM.</p>;
+  if (ncol > 400) return <p className="text-sm text-slate-600 dark:text-slate-400">Circuit has {ncol} layers — too deep to draw; see gate counts and QASM.</p>;
   const W = 46, H = 34, L = 64;
   const color: Record<string, string> = { h: "#6366f1", rz: "#0ea5e9", rx: "#f59e0b", rzz: "#10b981", xx_plus_yy: "#ec4899", state_preparation: "#8b5cf6" };
   const fmtp = (p: number | string) => (typeof p === "number" ? p.toFixed(2) : p.replace(/\*\*/g, "^").slice(0, 14));
   return (
-    <div className="overflow-auto">
+    <div role="region" aria-label="QAOA circuit (scrollable)" tabIndex={0} className={`overflow-auto ${FOCUS}`}>
       <svg width={L + ncol * W + 20} height={numQubits * H + 20} role="img" aria-label="QAOA circuit">
         {Array.from({ length: numQubits }, (_, q) => (
           <g key={q}>
@@ -87,7 +88,7 @@ export function CircuitView({ gates, numQubits, labels }: { gates: Gate[]; numQu
           );
         })}
       </svg>
-      <p className="mt-1 text-xs text-slate-500">Hover a gate for its parameters. Qubit i encodes variable i.</p>
+      <p className="mt-1 text-xs text-slate-600 dark:text-slate-400">Hover a gate for its parameters. Qubit i encodes variable i.</p>
     </div>
   );
 }
@@ -101,14 +102,14 @@ export function Landscape({ gammas, betas, energies }: { gammas: number[]; betas
   let best = { i: 0, j: 0 };
   energies.forEach((r, i) => r.forEach((v, j) => { if (v < energies[best.i][best.j]) best = { i, j }; }));
   return (
-    <div className="overflow-auto">
-      <svg width={gammas.length * cw + 60} height={betas.length * ch + 40}>
+    <div role="region" aria-label="Energy landscape (scrollable)" tabIndex={0} className={`overflow-auto ${FOCUS}`}>
+      <svg width={gammas.length * cw + 60} role="img" aria-label="p = 1 energy landscape heatmap" height={betas.length * ch + 40}>
         {energies.map((r, i) => r.map((v, j) => <rect key={`${i}${j}`} x={50 + j * cw} y={i * ch} width={cw} height={ch} fill={col(v)}><title>γ={gammas[j].toFixed(3)} β={betas[i].toFixed(3)} ⟨H⟩={v.toFixed(4)}</title></rect>))}
         <rect x={50 + best.j * cw} y={best.i * ch} width={cw} height={ch} fill="none" stroke="white" strokeWidth={2} />
         <text x={50} y={betas.length * ch + 14} fontSize={10} className="fill-slate-500">γ: 0 → π</text>
         <text x={0} y={10} fontSize={10} className="fill-slate-500">β ↓</text>
       </svg>
-      <p className="text-xs text-slate-500">Blue = lower energy. Minimum on the grid: ⟨H⟩ = {energies[best.i][best.j].toFixed(4)} at γ = {gammas[best.j].toFixed(3)}, β = {betas[best.i].toFixed(3)}.</p>
+      <p className="text-xs text-slate-600 dark:text-slate-400">Blue = lower energy. Minimum on the grid: ⟨H⟩ = {energies[best.i][best.j].toFixed(4)} at γ = {gammas[best.j].toFixed(3)}, β = {betas[best.i].toFixed(3)}.</p>
     </div>
   );
 }
