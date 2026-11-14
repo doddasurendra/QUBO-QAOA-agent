@@ -1,0 +1,74 @@
+name: uptime
+# Polls the live deep health check and alerts through a GitHub issue (GitHub emails repository watchers).
+# One open issue per outage: opened on the first failing run, commented once if the state changes, closed with a
+# recovery note when the site is healthy again. GitHub runs schedules best-effort (can be delayed by minutes) and
+# pauses them in public repos after 60 days without repository activity.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Override the URL to probe (e.g. to test the alert path)"
+        required: false
+
+permissions:
+  issues: write
+  contents: read
+
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      URL: ${{ github.event.inputs.url || vars.QOPT_HEALTH_URL || 'https://qopt-quantum-c4da.fly.dev/api/health/deep' }}
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      LABEL: uptime-alert
+    steps:
+      - uses: actions/checkout@v4
+        with: { sparse-checkout: scripts }
+      - name: Probe
+        id: probe
+        run: |
+          set +e
+          result=$(python3 scripts/uptime_check.py "$URL")
+          code=$?
+          set -e
+          echo "$result"
+          echo "result=$result" >> "$GITHUB_OUTPUT"
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+      - name: Open, update or close the alert issue
+        env:
+          RESULT: ${{ steps.probe.outputs.result }}
+          CODE: ${{ steps.probe.outputs.code }}
+        run: |
+          gh label create "$LABEL" --color B60205 --description "Automated uptime alert" 2>/dev/null || true
+          open=$(gh issue list --label "$LABEL" --state open --json number --jq '.[0].number // empty')
+          verdict=$(echo "$RESULT" | python3 -c "import json,sys;print(json.load(sys.stdin)['verdict'])")
+          reason=$(echo "$RESULT" | python3 -c "import json,sys;print(json.load(sys.stdin)['reason'])")
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if [ "$verdict" = "up" ]; then
+            if [ -n "$open" ]; then
+              gh issue comment "$open" --body "Recovered: $URL is healthy again ($(date -u +%FT%TZ)). [run]($run_url)"
+              gh issue close "$open"
+            fi
+            exit 0
+          fi
+          title="Site $verdict: $URL"
+          body=$(printf '**%s** at %s\n\nReason: `%s`\n\nProbe result:\n```json\n%s\n```\n[Workflow run](%s)\n\nThis issue closes automatically when the site recovers.' "$verdict" "$(date -u +%FT%TZ)" "$reason" "$RESULT" "$run_url")
+          if [ -z "$open" ]; then
+            gh issue create --title "$title" --label "$LABEL" --body "$body"
+          else
+            last=$(gh issue view "$open" --json title --jq .title)
+            if [ "$last" != "$title" ]; then
+              gh issue edit "$open" --title "$title"
+              gh issue comment "$open" --body "$body"
+            fi
+          fi
+          # fail the run on "down" so it is visible in the Actions tab too
+          [ "$CODE" = "1" ] && exit 1 || exit 0

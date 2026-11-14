@@ -17,6 +17,7 @@ from .. import __version__
 from ..config import get_settings
 from ..db import Dataset, SessionLocal, migrate
 from ..industries import PROBLEMS
+from ..services import health as _health  # noqa: F401 - import at startup so its uptime clock starts at boot
 from ..services.security import rate_limiter
 from . import routes_admin, routes_auth, routes_data, routes_opt
 
@@ -104,6 +105,12 @@ def create_app() -> FastAPI:
     @app.get("/api/health")
     def health():
         return {"status": "ok", "version": __version__}
+
+    @app.get("/api/health/deep")
+    def health_deep():
+        """Database, migrations, backup freshness and disk space; 503 when failing (for uptime monitors)."""
+        body, code = _health.deep_health()
+        return JSONResponse(body, code, headers={"Cache-Control": "no-store"})
 
     # Serve the built frontend if present (single-container deployment)
     dist = s.frontend_dist_path().resolve()
