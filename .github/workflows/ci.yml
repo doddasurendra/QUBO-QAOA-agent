@@ -12,7 +12,11 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - run: pip install -e ".[dev]" pip-audit
-      - run: python -m pytest -q
+      - name: Runtime limits (diagnostics for native-code crashes)
+        run: |
+          echo "ulimit -s: $(ulimit -s)"
+          python -c "import threading, resource; print('thread stack_size:', threading.stack_size(), '| RLIMIT_STACK:', resource.getrlimit(resource.RLIMIT_STACK))"
+      - run: python -X faulthandler -m pytest -q
       - name: Dependency vulnerability scan
         run: pip-audit --progress-spinner off || (echo "::warning::pip-audit reported vulnerabilities" && exit 1)
 

@@ -27,7 +27,8 @@ so no real-QPU job and no live Claude API call has been made.
 | 11 | axe-core WCAG 2.1 A/AA audit of every page + all violations fixed | done | `99372bc` |
 | 12 | Regression after a11y fixes (93 functional tests, per-browser runs) + one-command production launcher, app running locally | done | `011dd3d` |
 | 13 | Setup token for first admin; public cloud deployment on Fly.io (https://qopt-quantum-c4da.fly.dev) | done | `efec4d3`, `81b5f7c` |
-| 14 | Automated backups on Fly (owner chose SQLite + backups over Managed Postgres at ≥ $38/month): 30-day volume snapshots, daily integrity-checked in-app backups, off-site download script, tested restore | done | see `git log` |
+| 14 | Automated backups on Fly (owner chose SQLite + backups over Managed Postgres at ≥ $38/month): 30-day volume snapshots, daily integrity-checked in-app backups, off-site download script, tested restore | done | `52e56f6` |
+| 15 | Deep health check, GitHub Actions uptime monitor (alert + recovery verified live), external-monitor and custom-domain guides (owner has no domain yet); first CI runs fixed (frontend dependency vulnerabilities, Linux worker-thread crash) | done | `1496999` + see `git log` |
 
 ## Completed (implemented + tested)
 
@@ -53,8 +54,10 @@ so no real-QPU job and no live Claude API call has been made.
 
 ## Tests
 
-- **Passed:** backend `pytest` **162 / 162** (core 34, solvers 13, QAOA 23, industries/hybrid 36, industry
-  reference solvers 22, agents 11, API 17, deployment 6). **Browser E2E 94 / 94** (Playwright: Chromium,
+- **Passed:** backend `pytest` **177 / 177** (core 34, solvers 13, QAOA 23, industries/hybrid 36, industry
+  reference solvers 22, agents 11, API 18, deployment 6, backups 7, health/monitor 7). After the dependency upgrades
+  (Playwright 1.65), the full chromium E2E + accessibility suite passed locally (60 tests; one browser crash at
+  0.1 GB free memory, passed on re-run); firefox/webkit run in the CI matrix. **Browser E2E 94 / 94** (Playwright: Chromium,
   Firefox, WebKit; two consecutive clean full runs). Frontend `tsc` + `vite build` clean. Two live
   checks: the HTTP smoke test against a source-tree server (27/27), and the **installed-package** server in
   production mode started from outside the source tree, i.e. the Docker runtime layout (12/12: health,
@@ -114,6 +117,17 @@ so no real-QPU job and no live Claude API call has been made.
   - renewable allocation penalises shortfall and curtailment symmetrically, with deterministic forecasts.
 - PennyLane, Cirq and OpenFermion are not used; Qiskit and an independent NumPy simulator cross-check each other.
   Quantinuum and Azure Quantum are not integrated.
+- **CI history:** the first CI runs on GitHub (after the code was pushed) all failed and went unnoticed for four
+  pushes. Causes, both fixed: (1) `npm audit` high-severity advisories in DOMPurify 3.2.4 and React Router 6.28.0,
+  which shipped on the live site (upgraded to 3.4.17 / 6.30.6); (2) a segfault in Qiskit when its first use happened
+  inside a worker thread on GitHub's Linux runner (not reproducible on the Fly machine; fixed defensively by
+  initialising Qiskit/Aer in the main thread at startup and a 16 MB thread stack on Linux; CI now prints its stack
+  limits). Dev tooling upgraded: Vite 5.4.21, PostCSS 8.5.33, Playwright 1.65.1.
+- **Accepted dependency risks (documented, not fixed):** React Router 6 has two moderate advisories (open redirect via
+  backslash URLs in `<Link>`/`useNavigate`; SSR error deserialisation). The app passes only fixed paths and numeric
+  ids to `<Link>`, never calls `navigate()` with user input, and does not use SSR; the fix is React Router 7 (major).
+  Vite 5 has advisories affecting only its **dev server**, which is never used in production or CI (`vite build`
+  only); the fix is Vite 8 (major).
 - PDF ingestion needs `pypdf` (installed in the Docker image, not the dev venv). Frontend bundle ≈ 726 kB (not
   code-split). Benchmarks use small instances only; **no quantum advantage is claimed or demonstrated**.
 
@@ -151,6 +165,18 @@ Simulator mode only (no quantum-hardware or Anthropic credentials set on Fly).
 The administrator account has **not** been created yet: the owner creates it on first visit with the setup token
 from `.run/fly-secrets.env` (git-ignored, on the deploying machine).
 
+**The Fly account is on a free trial:** Fly stops the machine every 5 minutes ("Trial machine stopping … add a credit
+card"); the proxy restarts it on the next request (cold start of several seconds). Until the owner adds a card at
+https://fly.io/trial, scheduled in-app backups (first one due 10 min after start) and jobs running at the 5-minute
+mark cannot complete. Daily volume snapshots are unaffected. The earlier "always on" description was wrong for a trial
+account.
+
+**Monitoring:** `/api/health/deep` (database, migrations, backup freshness, disk) is polled every ~10 min by the
+GitHub Actions `uptime` workflow, which opens an `uptime-alert` issue on failure and closes it on recovery. Both
+paths were exercised against the live site (issue #1 opened by a deliberately failing URL, then closed by a healthy
+run). An external monitor (UptimeRobot / Better Stack) is documented in `docs/DEPLOYMENT.md` but needs the owner's
+account. Custom domain: none yet; one-command setup documented.
+
 ## Docker status
 
 The `Dockerfile` is verified: built by Fly's remote builder and running in production (above). `docker compose up`
@@ -159,7 +185,9 @@ Machine Platform enabled by the owner, admin rights, a reboot and ≈ 2–4 GB f
 
 ## Next implementation tasks
 
-1. Production hardening on Fly: a custom domain and uptime alerting; schedule `scripts\download-backup.ps1`
+0. Owner: add a card at https://fly.io/trial (machine stops every 5 min on the trial), create the admin account, set up
+   the external monitor, and add a custom domain when one is available.
+1. Production hardening on Fly: schedule `scripts\download-backup.ps1`
    (e.g. Windows Task Scheduler, weekly); PostgreSQL (Fly Managed Postgres, ≥ $38/month) if high availability or
    multiple app machines are needed, plus a CI job running the suite against PostgreSQL.
 2. With credentials: a real IBM job end-to-end through the approval flow; Braket/D-Wave integration tests.

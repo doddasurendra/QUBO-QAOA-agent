@@ -19,6 +19,10 @@ $Fly = Join-Path $env:USERPROFILE ".fly\bin\flyctl.exe"
 if (-not (Test-Path $Fly)) { $Fly = "flyctl" }
 New-Item -ItemType Directory -Force $Dest | Out-Null
 
+# Wake the machine if Fly has stopped it (auto-start on request); `flyctl ssh` needs a running machine.
+try { $null = Invoke-WebRequest "https://$App.fly.dev/api/health" -UseBasicParsing -TimeoutSec 90 }
+catch { throw "https://$App.fly.dev is not responding: $($_.Exception.Message)" }
+
 if (-not $NoCreate) {
   Write-Host "Creating a fresh backup on $App ..."
   # run as the app's own user so the backup files stay owned by (and prunable by) the application

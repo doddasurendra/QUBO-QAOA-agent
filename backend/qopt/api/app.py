@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import json
 import logging
+import sys
+import threading
 import time
 import uuid
 from contextlib import asynccontextmanager
@@ -20,6 +22,9 @@ from ..industries import PROBLEMS
 from ..services import health as _health  # noqa: F401 - import at startup so its uptime clock starts at boot
 from ..services.security import rate_limiter
 from . import routes_admin, routes_auth, routes_data, routes_opt
+
+
+THREAD_STACK_BYTES = 16 * 1024 * 1024
 
 
 class JsonFormatter(logging.Formatter):
@@ -50,9 +55,22 @@ def seed_samples():
         db.commit()
 
 
+def warm_up_native_libraries():
+    """Initialise Qiskit / Aer once in the main thread. Their first-time native initialisation inside a worker
+    thread crashed (segfault) on GitHub's Linux runners, whose thread stacks can be small."""
+    try:
+        from qiskit import QuantumCircuit
+        from qiskit.circuit import ParameterVector
+        from qiskit_aer import AerSimulator  # noqa: F401
+        QuantumCircuit(1).rx(ParameterVector("w", 1)[0], 0)
+    except Exception:  # noqa: BLE001 - optional at startup; real use reports its own errors
+        logging.getLogger("qopt").exception("quantum library warm-up failed")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     configure_logging()
+    warm_up_native_libraries()
     get_settings().effective_jwt_secret()   # fail fast in production without a secret
     migrate()
     seed_samples()
@@ -66,6 +84,16 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     s = get_settings()
+    # Worker threads (request threadpool, job pool) run numerical/native code. On Linux don't rely on the default
+    # thread stack, which glibc shrinks to ~2 MB when the process stack limit is "unlimited"; Linux reserves thread
+    # stacks virtually, so this costs no memory until used. Not on Windows: CPython commits the whole stack there,
+    # and large stacks exhaust the commit limit ("can't start new thread").
+    if sys.platform.startswith("linux"):
+        try:
+            if threading.stack_size() < THREAD_STACK_BYTES:
+                threading.stack_size(THREAD_STACK_BYTES)
+        except (ValueError, RuntimeError):
+            pass
     app = FastAPI(title="qopt — QUBO/QAOA Optimisation Platform", version=__version__, lifespan=lifespan,
                   docs_url="/api/docs", openapi_url="/api/openapi.json", redoc_url=None)
     app.add_middleware(CORSMiddleware, allow_origins=s.cors_origins, allow_credentials=False,

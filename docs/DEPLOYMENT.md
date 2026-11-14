@@ -47,6 +47,51 @@ flyctl logs -a qopt-quantum-c4da                    # live logs
   deployment are in the git-ignored `.run/fly-secrets.env` on the machine that deployed it.
 - Use `flyctl` from a Windows PowerShell pipe with care: it prepends a UTF-8 BOM to piped input; use `cmd /c "... < file"`.
 
+> **Fly trial accounts stop machines after 5 minutes** ("Trial machine stopping. To run for longer than 5m0s, add a
+> credit card"). The proxy restarts the machine on the next request (cold start of several seconds), but scheduled
+> in-app backups and long jobs cannot run until a card is added at https://fly.io/trial.
+
+### Monitoring and alerting
+
+- **Health endpoints:** `/api/health` is a cheap liveness probe (Fly's routing check). `/api/health/deep` checks the
+  database round-trip, that the schema is at the newest migration, backup freshness (newest backup ≤ 1.5 × the
+  interval; "pending" during the first interval after startup) and free disk space. Overall status is the worst
+  component: `ok` / `degraded` (HTTP 200) / `fail` (HTTP 503). It returns statuses, ages and percentages only.
+- **GitHub Actions monitor** (`.github/workflows/uptime.yml`): runs `scripts/uptime_check.py` about every 10
+  minutes (GitHub schedules are best-effort and pause in public repos after 60 days without commits). Three attempts
+  20 s apart before declaring "down". It opens **one** issue labelled `uptime-alert` per outage (GitHub emails the
+  repository's watchers, i.e. you), comments when the state changes, and comments + closes it on recovery. Test it with
+  *Actions → uptime → Run workflow* and a URL override such as `https://<app>.fly.dev/api/alert-test` (should open
+  an issue), then run it without an override (should close it). Override the URL with the repository variable
+  `QOPT_HEALTH_URL`.
+- **External monitor (second, independent channel):** create a free account at e.g. UptimeRobot or Better Stack and
+  add a monitor:
+
+  | setting | value |
+  |---|---|
+  | type | HTTP(s) **keyword** monitor |
+  | URL | `https://qopt-quantum-c4da.fly.dev/api/health/deep` |
+  | keyword | `"status":"ok"` (alert when the keyword is **missing**) |
+  | interval | 5 minutes |
+  | timeout | 30 seconds (allows for a cold start) |
+  | alert contacts | your email and/or phone |
+
+  A keyword check also alerts on `degraded` (e.g. backups not running). Use a plain HTTP-status check instead if
+  you only want alerts for full outages.
+
+### Custom domain (when you have one)
+
+```powershell
+flyctl certs add qopt.example.com -a qopt-quantum-c4da       # prints the DNS records to create
+flyctl ips list -a qopt-quantum-c4da                         # shared IPv4 + IPv6 of the app
+```
+
+At your DNS provider create either a **CNAME** `qopt.example.com → qopt-quantum-c4da.fly.dev` (subdomains), or for
+an apex/root domain an **A** record to the app's IPv4 and an **AAAA** record to its IPv6. Fly issues a free Let's
+Encrypt certificate automatically; `flyctl certs check qopt.example.com -a qopt-quantum-c4da` shows progress. Then:
+`flyctl secrets set QOPT_CORS_ORIGINS='["https://qopt.example.com"]'` (or edit `[env]` in `fly.toml` and deploy), and
+point the monitors at the new hostname.
+
 ### Backups and restore (SQLite on Fly)
 
 Three layers, no extra Fly product needed:
