@@ -22,10 +22,30 @@ Production mode refuses to start without a strong `QOPT_JWT_SECRET`.
   Dockerfile, passed 12/12 live HTTP checks (health, OpenAPI, SPA + assets, migrations, login, docs, all
   industry modules, a background job, secret not leaked). `tests/test_deployment.py` guards the packaging,
   migration, path and `.env.example` requirements in CI.
-- **Not verified here:** `docker build` / `docker compose up` themselves, and PostgreSQL. Docker, WSL2 and
-  PostgreSQL are not installed on the development machine (installing Docker Desktop requires enabling
-  WSL2/Hyper-V with admin rights and a reboot). CI (`.github/workflows/ci.yml`) builds the image. On a Docker
-  host, run the commands above; then check `docker compose ps` shows the app as `healthy`.
+- **Verified:** the `Dockerfile` builds and runs. It is the image deployed on Fly.io (built by Fly's remote builder,
+  149 MB), healthy, serving HTTPS, migrations applied to the volume, app process non-root.
+- **Not verified:** `docker compose up` (with PostgreSQL) on a local Docker host. Docker is not installed on the
+  development machine. On a Docker host, run the commands above; then check `docker compose ps` shows `healthy`.
+
+### Fly.io (live deployment)
+
+The app runs at **https://qopt-quantum-c4da.fly.dev** (region `sin`, Singapore: Fly offers no Indian region).
+`fly.toml` builds the repository `Dockerfile` on Fly's remote builders, so no local Docker is needed:
+
+```powershell
+flyctl auth login                                   # once, in the browser
+flyctl secrets import --stage -a qopt-quantum-c4da < secrets.env   # QOPT_JWT_SECRET, QOPT_BOOTSTRAP_TOKEN
+flyctl deploy --remote-only                         # rebuild + roll out after code changes
+flyctl logs -a qopt-quantum-c4da                    # live logs
+```
+
+- One always-on `shared-cpu-1x` machine with 2 GB RAM; SQLite on a 1 GB volume `qopt_data` mounted at `/app/data`
+  (survives restarts and redeploys). Jobs run in-process, so keep a single machine.
+- `docker-entrypoint.sh` starts as root only to make the root-owned volume writable, then drops to the `qopt` user.
+- `FORWARDED_ALLOW_IPS="*"` lets per-IP rate limits see real client addresses behind Fly's proxy.
+- **First admin:** open the URL and enter the setup token (`QOPT_BOOTSTRAP_TOKEN`). The generated values for this
+  deployment are in the git-ignored `.run/fly-secrets.env` on the machine that deployed it.
+- Use `flyctl` from a Windows PowerShell pipe with care: it prepends a UTF-8 BOM to piped input; use `cmd /c "... < file"`.
 
 ### Without Docker on Windows (one command)
 

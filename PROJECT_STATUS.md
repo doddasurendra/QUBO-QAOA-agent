@@ -25,7 +25,8 @@ so no real-QPU job and no live Claude API call has been made.
 | 9 | Browser E2E tests (Playwright, all 24 pages, CI job) + the bugs they found | done | `3be2f9c`, `cdba55b` |
 | 10 | E2E in Firefox and WebKit as well as Chromium (94 tests), CI browser matrix | done | `f26a147` |
 | 11 | axe-core WCAG 2.1 A/AA audit of every page + all violations fixed | done | `99372bc` |
-| 12 | Regression after a11y fixes (93 functional tests, per-browser runs) + one-command production launcher, app running locally | done | see `git log` |
+| 12 | Regression after a11y fixes (93 functional tests, per-browser runs) + one-command production launcher, app running locally | done | `011dd3d` |
+| 13 | Setup token for first admin; public cloud deployment on Fly.io (https://qopt-quantum-c4da.fly.dev) | done | `efec4d3` + see `git log` |
 
 ## Completed (implemented + tested)
 
@@ -137,18 +138,27 @@ so no real-QPU job and no live Claude API call has been made.
   (`.run/qopt.db`). Started and verified on 2026-11-14 (health, UI, OpenAPI, migrations).
 - Docker: `docker compose up -d --build` (uses the same `.env`), then `curl http://localhost:8000/api/health`.
 
+## Live deployment
+
+**https://qopt-quantum-c4da.fly.dev** — Fly.io, region Singapore, deployed 2026-11-14 from commit `efec4d3` + the
+Fly configuration. Verified live: `/api/health` ok, SPA over HTTPS (HTTP redirects to HTTPS), security headers,
+OpenAPI, unknown API paths 404, admin bootstrap **refused without the setup token** (403), migrations applied to the
+1 GB volume, database owned by the unprivileged `qopt` user, machine started with its health check passing.
+Simulator mode only (no quantum-hardware or Anthropic credentials set on Fly).
+
+The administrator account has **not** been created yet: the owner creates it on first visit with the setup token
+from `.run/fly-secrets.env` (git-ignored, on the deploying machine).
+
 ## Docker status
 
-**Not run on this machine:** Docker Desktop is not installed. Installing it requires enabling the Windows features
-WSL2 / Virtual Machine Platform (admin rights + reboot), which has to be done by the machine owner, and it needs
-≈ 2–4 GB of free RAM (this machine had 0.5–1.3 GB free during the session). Firmware virtualisation is enabled, so
-it is possible: install Docker Desktop from docker.com, reboot, then run `docker compose up -d --build`; the app is
-then at http://localhost:8000. No public URL exists: that needs a cloud host chosen by the owner.
+The `Dockerfile` is verified: built by Fly's remote builder and running in production (above). `docker compose up`
+with PostgreSQL has **not** been run: Docker Desktop is not installed on this machine (it needs WSL2 / Virtual
+Machine Platform enabled by the owner, admin rights, a reboot and ≈ 2–4 GB free RAM).
 
 ## Next implementation tasks
 
-1. Install Docker Desktop (owner: WSL2 + reboot, free RAM), `docker compose up --build`, confirm the container is
-   `healthy`, run the suite against PostgreSQL; choose a cloud host if a public URL is wanted.
+1. Production hardening on Fly: managed PostgreSQL instead of SQLite, automated volume snapshots/backups, a custom
+   domain, uptime alerting; run the suite against PostgreSQL.
 2. With credentials: a real IBM job end-to-end through the approval flow; Braket/D-Wave integration tests.
 3. With an API key: agent evaluations on the three natural-language example prompts; tune prompts and effort.
 4. Manual screen-reader + keyboard-only review; audit dark mode; live-region announcements for job progress; data-table

@@ -1,5 +1,8 @@
 # qopt — QUBO / QAOA hybrid optimisation platform
 
+**Live:** https://qopt-quantum-c4da.fly.dev (Fly.io, Singapore; simulator mode, no quantum hardware or AI-agent
+credentials configured). Deployment details: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+
 Formulate real-world problems as mathematically verified QUBO models, solve them with classical
 solvers and QAOA (exact simulation, Qiskit Aer, or authorised quantum hardware), compare the results
 honestly, and drive the workflow with specialised Claude agents.

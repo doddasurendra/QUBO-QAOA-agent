@@ -28,8 +28,12 @@ ENV QOPT_FRONTEND_DIST=/app/frontend/dist \
     QOPT_DOCS_DIR=/app/docs \
     QOPT_DATABASE_URL=sqlite:////app/data/qopt.db
 RUN mkdir -p /app/data && chown -R qopt /app
-USER qopt
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh && chmod 0755 /usr/local/bin/docker-entrypoint.sh
+# Starts as root only to make a mounted data volume writable, then drops to the unprivileged "qopt" user
+# (see docker-entrypoint.sh); the application itself never runs as root.
 EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s \
   CMD python -c "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/api/health')"
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["uvicorn", "qopt.api.app:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers", "--workers", "1"]
