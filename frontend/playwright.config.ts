@@ -18,11 +18,15 @@ export default defineConfig({
     baseURL: `http://127.0.0.1:${port}`,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
-    channel,
   },
+  // One backend + DB for all browsers; projects run one after another (workers: 1) and tests tag the data they
+  // create with the project name, so the three runs don't collide. Select one with --project=firefox etc.
   projects: [
-    { name: "setup", testMatch: /auth\.setup\.ts/ },
-    { name: "desktop", testMatch: /.*\.spec\.ts/, dependencies: ["setup"], use: { ...devices["Desktop Chrome"], channel } },
+    // admin bootstrap through the UI: once per server, always in chromium (CI installs it in every browser job)
+    { name: "setup", testMatch: /auth\.setup\.ts/, use: { ...devices["Desktop Chrome"], channel } },
+    { name: "chromium", testMatch: /.*\.spec\.ts/, dependencies: ["setup"], use: { ...devices["Desktop Chrome"], channel } },
+    { name: "firefox", testMatch: /.*\.spec\.ts/, dependencies: ["setup"], use: { ...devices["Desktop Firefox"] } },
+    { name: "webkit", testMatch: /.*\.spec\.ts/, dependencies: ["setup"], use: { ...devices["Desktop Safari"] } },
   ],
   webServer: {
     command: "node e2e/start-server.mjs",

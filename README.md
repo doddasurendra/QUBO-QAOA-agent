@@ -23,7 +23,7 @@ cd backend; ..\.venv\Scripts\python -m pytest           # run the test suite
 cd ..\frontend; npm install; npm run build              # build the UI
 cd ..\backend; ..\.venv\Scripts\uvicorn qopt.api.app:app --port 8000
 # open http://localhost:8000 — the first visit creates the admin account
-cd ..\frontend; npx playwright install chromium; npm run e2e   # 32 browser E2E tests against the real backend
+cd ..\frontend; npx playwright install chromium firefox webkit; npm run e2e   # browser E2E in 3 engines
 ```
 
 ## Deploy (Docker + PostgreSQL)

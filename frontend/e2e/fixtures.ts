@@ -8,6 +8,12 @@ export const AUTH_DIR = join(dirname(fileURLToPath(import.meta.url)), ".auth");
 export const ADMIN = { email: "e2e-admin@example.com", password: "e2e-admin-password-1", name: "E2E Admin" };
 export const RESEARCHER = { email: "e2e-researcher@example.com", password: "e2e-researcher-pass-1" };
 
+/** Short tag of the running browser project ("chromium" | "firefox" | "webkit"); used to keep the data each
+ *  browser run creates (users, keys, documents, experiments, approvals) distinct in the shared database. */
+export function tag(): string {
+  return base.info().project.name;
+}
+
 export function token(role: "admin" | "researcher"): string {
   return JSON.parse(readFileSync(join(AUTH_DIR, `${role}.json`), "utf-8")).token;
 }

@@ -37,11 +37,17 @@ cd ..\frontend; npm install; npm run dev                 # UI on :5173 (proxies 
 
 ```powershell
 cd frontend
-npx playwright install chromium     # once: Playwright's pinned Chromium
-npm run e2e                         # build the SPA, start the real backend on :8790 with a fresh DB, run 32 tests
-npm run e2e:only                    # re-run without rebuilding
+npx playwright install chromium firefox webkit   # once: Playwright's pinned browser builds
+npm run e2e                         # build the SPA, start the real backend on :8790, run all 3 browsers (94 tests)
+npm run e2e:only -- --project=firefox            # one browser, no rebuild (setup always runs in chromium)
 npx playwright show-report e2e\.report
 ```
+
+The suite runs in **Chromium, Firefox and WebKit** (Safari's engine): one setup test plus 31 tests per browser.
+Locally the browsers run one after another against one server and database, so every spec tags the data it creates
+with `tag()` (the project name), e.g. `my-model-firefox`, `e2e-viewer-webkit@example.com`. Keep doing this for new
+tests, and scope locators to a section when another browser's data may be on the page. In CI each browser is a
+separate matrix job with its own fresh backend.
 
 `e2e/start-server.mjs` starts uvicorn from `backend/` with a throw-away SQLite DB (`e2e/.work`), real job threads,
 the production SPA build, and agents forced unavailable. `auth.setup.ts` bootstraps the admin **through the UI** and
@@ -52,7 +58,8 @@ Ising → circuit + QASM → QAOA → simulator → classical → hybrid → ind
 `03-platform` (users/RBAC incl. viewer, API keys, datasets, research upload + search, agents unavailable, hardware
 approval reject + refused approve, admin config/audit, usage, docs, sign-out, mobile menu + no horizontal scroll).
 The active model is per browser tab, so each test selects it (`useExperiment`). Set `QOPT_PYTHON` if the venv is not
-at `<repo>/.venv`, and `PW_CHANNEL=msedge|chrome` to use an installed browser (Edge crashed after downloads here).
+at `<repo>/.venv`, and `PW_CHANNEL=msedge|chrome` to run the chromium project in an installed browser (Edge crashed
+after downloads here).
 
 ## Conventions you must not break
 
