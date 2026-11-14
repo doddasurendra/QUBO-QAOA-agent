@@ -21,6 +21,8 @@ jobs:
           python -X faulthandler -c "from qiskit import QuantumCircuit; print('qiskit main thread ok', QuantumCircuit(1).num_qubits)" || echo "QISKIT MAIN-THREAD CRASH (exit $?)"
           python -X faulthandler -c "import threading; from qiskit import QuantumCircuit; t=threading.Thread(target=lambda: print('qiskit worker thread ok', QuantumCircuit(1).num_qubits)); t.start(); t.join()" || echo "QISKIT WORKER-THREAD CRASH (exit $?)"
           python -c "import qiskit, qiskit_aer, numpy, rustworkx; print('qiskit', qiskit.__version__, 'aer', qiskit_aer.__version__, 'numpy', numpy.__version__, 'rustworkx', rustworkx.__version__)"
+      - name: Bisect native crash (diagnostic, never fails the job)
+        run: bash ../.github/scripts/qiskit_crash_bisect.sh
       - run: python -X faulthandler -m pytest -q
       - name: Dependency vulnerability scan
         run: pip-audit --progress-spinner off || (echo "::warning::pip-audit reported vulnerabilities" && exit 1)
