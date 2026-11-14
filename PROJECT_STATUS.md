@@ -54,8 +54,9 @@ so no real-QPU job and no live Claude API call has been made.
 
 ## Tests
 
-- **Passed:** backend `pytest` **177 / 177** (core 34, solvers 13, QAOA 23, industries/hybrid 36, industry
-  reference solvers 22, agents 11, API 18, deployment 6, backups 7, health/monitor 7). After the dependency upgrades
+- **Passed:** backend `pytest` **178 / 178** (core 34, solvers 13, QAOA 23, industries/hybrid 36, industry
+  reference solvers 22, agents 11, API 18, deployment 6, backups 7, health/monitor 7, native-thread regression 1).
+  **GitHub CI fully green** (run 43572749019: backend, frontend, e2e chromium/firefox/webkit, docker). After the dependency upgrades
   (Playwright 1.65), the full chromium E2E + accessibility suite passed locally (60 tests; one browser crash at
   0.1 GB free memory, passed on re-run); firefox/webkit run in the CI matrix. **Browser E2E 94 / 94** (Playwright: Chromium,
   Firefox, WebKit; two consecutive clean full runs). Frontend `tsc` + `vite build` clean. Two live
@@ -119,10 +120,14 @@ so no real-QPU job and no live Claude API call has been made.
   Quantinuum and Azure Quantum are not integrated.
 - **CI history:** the first CI runs on GitHub (after the code was pushed) all failed and went unnoticed for four
   pushes. Causes, both fixed: (1) `npm audit` high-severity advisories in DOMPurify 3.2.4 and React Router 6.28.0,
-  which shipped on the live site (upgraded to 3.4.17 / 6.30.6); (2) a segfault in Qiskit when its first use happened
-  inside a worker thread on GitHub's Linux runner (not reproducible on the Fly machine; fixed defensively by
-  initialising Qiskit/Aer in the main thread at startup and a 16 MB thread stack on Linux; CI now prints its stack
-  limits). Dev tooling upgraded: Vite 5.4.21, PostCSS 8.5.33, Playwright 1.65.1.
+  which shipped on the live site (upgraded to 3.4.17 / 6.30.6); (2) a segfault in Qiskit (`CircuitData()`) on GitHub's Linux
+  runner. Root cause, isolated by bisecting on the runner: with **Qiskit ≥ 2.5** (2.5.2, 2.6.1, 2.6.2 crash; 2.4.2
+  does not), building circuits in a short-lived asyncio event-loop thread, letting it exit, then building circuits in
+  a second one crashes, unless Qiskit was first used in the main thread. Minimal repro: a bare FastAPI app with a
+  circuit in its lifespan, started twice under TestClient. Not our code, not the OS image (same on ubuntu-24.04),
+  not thread stack size or faulthandler (both tested and ruled out). Fix: `qopt.api.app` warms Qiskit up in the
+  main thread at import (uvicorn and pytest import it there); the earlier stack-size workaround was removed;
+  `tests/test_native_threads.py` runs the crashing pattern in a subprocess. Not reported upstream yet. Dev tooling upgraded: Vite 5.4.21, PostCSS 8.5.33, Playwright 1.65.1.
 - **Accepted dependency risks (documented, not fixed):** React Router 6 has two moderate advisories (open redirect via
   backslash URLs in `<Link>`/`useNavigate`; SSR error deserialisation). The app passes only fixed paths and numeric
   ids to `<Link>`, never calls `navigate()` with user input, and does not use SSR; the fix is React Router 7 (major).
