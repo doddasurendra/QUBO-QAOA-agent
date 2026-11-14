@@ -21,11 +21,20 @@ jobs:
           python -X faulthandler -c "from qiskit import QuantumCircuit; print('qiskit main thread ok', QuantumCircuit(1).num_qubits)" || echo "QISKIT MAIN-THREAD CRASH (exit $?)"
           python -X faulthandler -c "import threading; from qiskit import QuantumCircuit; t=threading.Thread(target=lambda: print('qiskit worker thread ok', QuantumCircuit(1).num_qubits)); t.start(); t.join()" || echo "QISKIT WORKER-THREAD CRASH (exit $?)"
           python -c "import qiskit, qiskit_aer, numpy, rustworkx; print('qiskit', qiskit.__version__, 'aer', qiskit_aer.__version__, 'numpy', numpy.__version__, 'rustworkx', rustworkx.__version__)"
-      - name: faulthandler experiment (diagnostic)
+      - name: thread-reuse experiment (diagnostic)
         continue-on-error: true
         run: |
-          python -m pytest -q -x -p no:faulthandler tests/test_api.py && echo 'RESULT no-faulthandler: OK' || echo 'RESULT no-faulthandler: FAIL'
-          python -m pytest -q -x tests/test_api.py && echo 'RESULT default-plugin: OK' || echo 'RESULT default-plugin: FAIL'
+          cat > /tmp/seq.py <<'EOF'
+          import sys, threading
+          if sys.argv[1] == "big": threading.stack_size(16 * 1024 * 1024)
+          def use():
+              from qiskit import QuantumCircuit
+              QuantumCircuit(2)
+          for i in range(int(sys.argv[2])):
+              t = threading.Thread(target=use); t.start(); t.join()
+          print("ok")
+          EOF
+          for mode in default big; do for n in 2 5; do python -X faulthandler /tmp/seq.py $mode $n >/tmp/o 2>&1 && echo "RESULT $mode x$n: OK" || { echo "RESULT $mode x$n: CRASH"; grep -m2 'File ' /tmp/o; }; done; done
       - run: python -X faulthandler -m pytest -q
       - name: Dependency vulnerability scan
         run: pip-audit --progress-spinner off || (echo "::warning::pip-audit reported vulnerabilities" && exit 1)
