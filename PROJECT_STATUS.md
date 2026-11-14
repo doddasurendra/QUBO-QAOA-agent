@@ -26,7 +26,8 @@ so no real-QPU job and no live Claude API call has been made.
 | 10 | E2E in Firefox and WebKit as well as Chromium (94 tests), CI browser matrix | done | `f26a147` |
 | 11 | axe-core WCAG 2.1 A/AA audit of every page + all violations fixed | done | `99372bc` |
 | 12 | Regression after a11y fixes (93 functional tests, per-browser runs) + one-command production launcher, app running locally | done | `011dd3d` |
-| 13 | Setup token for first admin; public cloud deployment on Fly.io (https://qopt-quantum-c4da.fly.dev) | done | `efec4d3` + see `git log` |
+| 13 | Setup token for first admin; public cloud deployment on Fly.io (https://qopt-quantum-c4da.fly.dev) | done | `efec4d3`, `81b5f7c` |
+| 14 | Automated backups on Fly (owner chose SQLite + backups over Managed Postgres at ≥ $38/month): 30-day volume snapshots, daily integrity-checked in-app backups, off-site download script, tested restore | done | see `git log` |
 
 ## Completed (implemented + tested)
 
@@ -43,6 +44,7 @@ so no real-QPU job and no live Claude API call has been made.
 | Industries (27) | **Finance:** portfolio selection, discrete investment allocation, fraud-detection feature selection, transaction settlement scheduling · **Healthcare:** staff scheduling, operating-room scheduling, clinical-trial site selection, drug-discovery compound selection · **Telecom:** base-station assignment, spectrum allocation, network routing · **Energy:** EV charging, unit commitment, battery arbitrage, renewable portfolio allocation, demand response · **Logistics:** delivery TSP, capacitated vehicle routing, cargo loading, warehouse dock scheduling · **Manufacturing:** machine load balancing, job-shop scheduling, production planning · **Supply chain:** facility location, supplier selection, two-echelon network design, multi-echelon replenishment. Each has a schema, formulation, limitations, interpretation with domain checks, SAMPLE data and API | every example validated exhaustively (§2, 27/27 ✅) **and**, for the 21 later modules, checked against an independent brute-force solver written from the problem definition (`tests/test_industries_reference.py`, 22 tests) |
 | Agents | 10 roles, tool allow-lists, manual Claude tool-use loop (official SDK, `claude-opus-5-5`, explicit effort, server-side refusal fallback), delegation with depth limit, iteration/token/USD budgets, needs-input halt, approval-only hardware tool, usage & cost tracking | `tests/test_agents.py` (11), scripted fake client + real tools |
 | Persistence | SQLAlchemy 2 models (9 tables), Alembic migration `0001` **shipped inside the package** (`qopt/migrations`), SQLite default / PostgreSQL URL | migrations run in every API test and from an installed package |
+| Backups | SQLite online-backup copies with `PRAGMA integrity_check`, scheduler (daily, keep 14), pruning, restore with automatic pre-restore copy, CLI (`python -m qopt.services.backup`), admin API + UI card, off-site download script; Fly volume snapshots kept 30 days | `tests/test_backup.py` (7, incl. restore round-trip and corrupt-file refusal) |
 | API & security | JWT + hashed API keys, RBAC admin/researcher/viewer, bootstrap-once admin, login throttling, per-user & per-IP rate limits, upload limits, schema validation, job quotas & timeouts, approval workflow, audit log with secret redaction, security headers, structured JSON logs; production refuses missing or weak JWT secrets | `tests/test_api.py` (16), `tests/test_deployment.py` (6) |
 | Frontend | 24 pages wired to real endpoints, industry templates grouped by sector, execution-kind badges, SAMPLE data labelled, form labels linked with `htmlFor`/`id` | `tsc` clean, `vite build` OK; **94 Playwright browser E2E tests** in Chromium, Firefox and WebKit against the real backend (below) |
 | Accessibility | axe-core 4.10 with WCAG 2.0/2.1 A + AA rules on the login screen, all 24 pages, result views (compiled QUBO, validation, circuit, industry formulation), hovered buttons and the mobile menu: **0 violations**. Fixed to get there: contrast of sidebar labels, status text, secondary text on tinted rows/bubbles and button hover states; names for every unlabelled input/select/textarea/checkbox and icon-only button; keyboard access + focus ring for every scroll region; screen-reader text for ✓/✗ | `frontend/e2e/04-accessibility.spec.ts` (28 checks, chromium) |
@@ -157,8 +159,9 @@ Machine Platform enabled by the owner, admin rights, a reboot and ≈ 2–4 GB f
 
 ## Next implementation tasks
 
-1. Production hardening on Fly: managed PostgreSQL instead of SQLite, automated volume snapshots/backups, a custom
-   domain, uptime alerting; run the suite against PostgreSQL.
+1. Production hardening on Fly: a custom domain and uptime alerting; schedule `scripts\download-backup.ps1`
+   (e.g. Windows Task Scheduler, weekly); PostgreSQL (Fly Managed Postgres, ≥ $38/month) if high availability or
+   multiple app machines are needed, plus a CI job running the suite against PostgreSQL.
 2. With credentials: a real IBM job end-to-end through the approval flow; Braket/D-Wave integration tests.
 3. With an API key: agent evaluations on the three natural-language example prompts; tune prompts and effort.
 4. Manual screen-reader + keyboard-only review; audit dark mode; live-region announcements for job progress; data-table

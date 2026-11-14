@@ -10,6 +10,7 @@ def api(tmp_path, monkeypatch):
     monkeypatch.setenv("QOPT_WORKER_THREADS", "0")
     monkeypatch.setenv("QOPT_JWT_SECRET", "test-secret-" + "x" * 40)
     monkeypatch.setenv("QOPT_RATE_LIMIT_PER_MINUTE", "10000")
+    monkeypatch.setenv("QOPT_BACKUP_INTERVAL_HOURS", "0")      # no background backup thread in API tests
     for k in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN"):
         monkeypatch.delenv(k, raising=False)
     from qopt.config import get_settings

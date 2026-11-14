@@ -55,7 +55,12 @@ async def lifespan(app: FastAPI):
     get_settings().effective_jwt_secret()   # fail fast in production without a secret
     migrate()
     seed_samples()
-    yield
+    from ..services import backup
+    backup.start_scheduler()
+    try:
+        yield
+    finally:
+        backup.stop_scheduler()
 
 
 def create_app() -> FastAPI:

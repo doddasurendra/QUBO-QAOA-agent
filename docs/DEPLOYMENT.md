@@ -47,6 +47,39 @@ flyctl logs -a qopt-quantum-c4da                    # live logs
   deployment are in the git-ignored `.run/fly-secrets.env` on the machine that deployed it.
 - Use `flyctl` from a Windows PowerShell pipe with care: it prepends a UTF-8 BOM to piped input; use `cmd /c "... < file"`.
 
+### Backups and restore (SQLite on Fly)
+
+Three layers, no extra Fly product needed:
+
+| layer | what | where | retention |
+|---|---|---|---|
+| Volume snapshots | Fly's daily snapshot of the whole volume | Fly | 30 days (`snapshot_retention = 30`; first 10 GB free) |
+| In-app backups | consistent SQLite copy (online backup API), `PRAGMA integrity_check` before it is kept | `/app/data/backups` on the volume | daily, newest 14 (`QOPT_BACKUP_INTERVAL_HOURS`, `QOPT_BACKUP_KEEP`) |
+| Off-site copy | `scripts\download-backup.ps1` creates a fresh backup and downloads it, then re-checks integrity | `backups-offsite\` on your PC (git-ignored) | your choice; run it e.g. weekly |
+
+Administrators see the backups and a **Back up now** button under *Administration → Database backups*. There is
+deliberately no web download (backups contain password hashes); off-site copies go through your `flyctl` login.
+
+**Restore an in-app backup** (the current database is copied to a `pre-restore` backup first):
+
+```powershell
+flyctl ssh console -a qopt-quantum-c4da -u qopt -C "python -m qopt.services.backup list"
+flyctl ssh console -a qopt-quantum-c4da -u qopt -C "python -m qopt.services.backup restore /app/data/backups/<file>"
+flyctl machine restart -a qopt-quantum-c4da          # start clean on the restored data
+```
+
+Run it while nobody is working in the app: writes made during the restore are overwritten.
+
+**Restore an off-site copy:** upload it, then restore as above:
+`flyctl ssh sftp shell -a qopt-quantum-c4da` → `put backups-offsite\<file> /app/data/backups/<file>`.
+
+**Restore a volume snapshot** (whole-disk rollback): `flyctl volumes snapshots list <volume id>`, then
+`flyctl volumes create qopt_data --snapshot-id <id> -r sin -a qopt-quantum-c4da`, and move the machine to the new
+volume (`flyctl machine update <machine id> --mount ...`, or destroy the old machine/volume and `flyctl deploy`).
+
+PostgreSQL (`docker-compose.yml`, or Fly Managed Postgres if chosen later) uses the database provider's backups; the
+in-app backup service reports itself as not applicable there.
+
 ### Without Docker on Windows (one command)
 
 `powershell -ExecutionPolicy Bypass -File scripts\run-production.ps1` serves the app at http://localhost:8080 in

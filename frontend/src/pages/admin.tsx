@@ -68,10 +68,24 @@ export function AdminPage() {
   const [action, setAction] = useState("");
   const [audit, auerr, reloadAudit] = useLoad(() => api.get(`/admin/audit?limit=200${action ? `&action=${action}` : ""}`), [action]);
   const [notes, setNotes] = useState<Record<number, string>>({});
+  const [backups, berr, reloadB] = useLoad(() => api.get("/admin/backups"));
+  const [made, setMade] = useState<any>();
   const { busy, error, run } = useAction();
   return (
-    <Page title="Administration" subtitle="Configuration (no secrets are ever returned), hardware approvals and the audit log.">
-      <ErrorBox error={cerr || aerr || auerr || error} />
+    <Page title="Administration" subtitle="Configuration (no secrets are ever returned), hardware approvals, backups and the audit log.">
+      <ErrorBox error={cerr || aerr || auerr || berr || error} />
+      {backups && <Card title="Database backups" actions={backups.enabled && <button className="btn" disabled={busy} onClick={() => run(async () => { setMade(await api.post("/admin/backups")); reloadB(); })}>Back up now</button>}>
+        {!backups.enabled ? <Note>{backups.location}</Note> : <>
+          <p className="text-sm">Consistent, integrity-checked copies every {backups.schedule.interval_hours} h, newest {backups.schedule.keep} kept, in <code>{backups.location}</code>.
+            {" "}Scheduler: {backups.schedule.running ? <span className="text-ok">running</span> : <span className="text-warn">not running</span>}
+            {backups.schedule.last_error && <> · <span className="text-bad">last error: {backups.schedule.last_error}</span></>}</p>
+          {made && <Note tone="ok">Backup {made.name} created ({(made.size_bytes / 1024).toFixed(1)} KB, integrity {made.integrity}).</Note>}
+          {backups.backups.length === 0 ? <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">No backups yet.</p> :
+            <div role="region" aria-label="Backup files" tabIndex={0} className={`mt-2 max-h-64 overflow-auto ${FOCUS}`}><table className="table"><thead><tr><th>file</th><th>size</th><th>created</th></tr></thead>
+              <tbody>{backups.backups.map((b: any) => <tr key={b.name}><td className="font-mono text-xs">{b.name}</td><td>{(b.size_bytes / 1024).toFixed(1)} KB</td><td className="text-xs">{new Date(b.created_at).toLocaleString()}</td></tr>)}</tbody></table></div>}
+          <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">{backups.note}</p>
+        </>}
+      </Card>}
       <Card title="Hardware job approvals">
         {approvals?.length === 0 && <p className="text-sm text-slate-600 dark:text-slate-400">No requests.</p>}
         <table className="table"><tbody>{approvals?.map((a: any) => (

@@ -38,6 +38,11 @@ class Settings(BaseSettings):
     agent_daily_budget_usd: float = 10.0
     agent_run_budget_usd: float = 2.0
     redis_url: str = ""                         # optional; not required for single-node deployments
+    # Built-in SQLite backups (ignored for PostgreSQL): consistent copy every N hours, newest K kept.
+    backup_interval_hours: float = 24.0         # 0 disables the scheduler
+    backup_keep: int = 14
+    backup_dir: str = ""                        # default: <database dir>/backups
+    backup_first_delay_s: float = 600.0         # first scheduled backup this long after startup
     # Locations of the built SPA and the markdown docs. Empty → the source-checkout defaults
     # (<repo>/frontend/dist, <repo>/docs). Set explicitly for installed deployments (the Docker image does).
     frontend_dist: str = ""

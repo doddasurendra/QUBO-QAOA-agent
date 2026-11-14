@@ -218,6 +218,34 @@ def overview(user: User = Depends(viewer), db: Session = Depends(get_db)):
             "recent_jobs": [job_out(j) for j in recent], "data_source": "live application database"}
 
 
+# ------------------------------------------------------------------ backups (SQLite deployments)
+@router.get("/admin/backups")
+def backups_list(_: User = Depends(admin)):
+    from ..services import backup
+    s = get_settings()
+    try:
+        items, where, enabled = backup.list_backups(), str(backup.backup_dir()), True
+    except backup.BackupUnavailable as e:
+        items, where, enabled = [], str(e), False
+    sch = backup.scheduler
+    return {"enabled": enabled, "location": where, "backups": items,
+            "schedule": {"interval_hours": s.backup_interval_hours, "keep": s.backup_keep,
+                         "running": sch is not None, "runs": sch.runs if sch else 0,
+                         "last_error": sch.last_error if sch else None},
+            "note": "Copies live on the server volume. Keep an off-site copy: scripts/download-backup.ps1."}
+
+
+@router.post("/admin/backups")
+def backups_create(me_: User = Depends(admin), db: Session = Depends(get_db)):
+    from ..services import backup
+    try:
+        info = backup.create_backup(reason=f"admin:{me_.id}")
+    except backup.BackupUnavailable as e:
+        raise HTTPException(409, str(e))
+    audit("backup_create", me_.id, f"backup:{info['name']}", detail={"size_bytes": info["size_bytes"]}, db=db)
+    return info
+
+
 # ------------------------------------------------------------------ documentation
 @router.get("/docs-content")
 def docs_list(_: User = Depends(viewer)):
