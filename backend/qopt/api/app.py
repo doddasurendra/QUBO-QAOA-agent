@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import logging
-import sys
 import threading
 import time
 import uuid
@@ -23,8 +22,6 @@ from ..services import health as _health  # noqa: F401 - import at startup so it
 from ..services.security import rate_limiter
 from . import routes_admin, routes_auth, routes_data, routes_opt
 
-
-THREAD_STACK_BYTES = 16 * 1024 * 1024
 
 
 class JsonFormatter(logging.Formatter):
@@ -55,22 +52,38 @@ def seed_samples():
         db.commit()
 
 
+_warmed_up = False
+
+
 def warm_up_native_libraries():
-    """Initialise Qiskit / Aer once in the main thread. Their first-time native initialisation inside a worker
-    thread crashed (segfault) on GitHub's Linux runners, whose thread stacks can be small."""
+    """Use Qiskit once in the main thread, before any server/job thread touches it.
+
+    Qiskit >= 2.5 on Linux segfaults (in ``CircuitData()``) when circuits are built in a thread running an asyncio
+    event loop, that thread exits, and a later event-loop thread builds circuits again - unless Qiskit was first used
+    in the main thread. Reproduced on GitHub's runners with a bare FastAPI app started twice under TestClient
+    (Qiskit 2.5.2 / 2.6.1 / 2.6.2 crash, 2.4.2 does not; a main-thread warm-up prevents it). uvicorn and pytest
+    both import this module in the main thread, so the module-level call below covers them."""
+    global _warmed_up
+    if _warmed_up:
+        return
     try:
         from qiskit import QuantumCircuit
         from qiskit.circuit import ParameterVector
         from qiskit_aer import AerSimulator  # noqa: F401
         QuantumCircuit(1).rx(ParameterVector("w", 1)[0], 0)
+        _warmed_up = True
     except Exception:  # noqa: BLE001 - optional at startup; real use reports its own errors
         logging.getLogger("qopt").exception("quantum library warm-up failed")
+
+
+if threading.current_thread() is threading.main_thread():
+    warm_up_native_libraries()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     configure_logging()
-    warm_up_native_libraries()
+    warm_up_native_libraries()   # no-op if the import-time warm-up already ran (the normal case)
     get_settings().effective_jwt_secret()   # fail fast in production without a secret
     migrate()
     seed_samples()
@@ -84,16 +97,6 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     s = get_settings()
-    # Worker threads (request threadpool, job pool) run numerical/native code. On Linux don't rely on the default
-    # thread stack, which glibc shrinks to ~2 MB when the process stack limit is "unlimited"; Linux reserves thread
-    # stacks virtually, so this costs no memory until used. Not on Windows: CPython commits the whole stack there,
-    # and large stacks exhaust the commit limit ("can't start new thread").
-    if sys.platform.startswith("linux"):
-        try:
-            if threading.stack_size() < THREAD_STACK_BYTES:
-                threading.stack_size(THREAD_STACK_BYTES)
-        except (ValueError, RuntimeError):
-            pass
     app = FastAPI(title="qopt — QUBO/QAOA Optimisation Platform", version=__version__, lifespan=lifespan,
                   docs_url="/api/docs", openapi_url="/api/openapi.json", redoc_url=None)
     app.add_middleware(CORSMiddleware, allow_origins=s.cors_origins, allow_credentials=False,
