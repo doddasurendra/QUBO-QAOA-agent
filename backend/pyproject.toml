@@ -25,6 +25,7 @@ dependencies = [
 ibm = ["qiskit-ibm-runtime>=0.30"]
 braket = ["amazon-braket-sdk>=1.80"]
 dwave = ["dwave-ocean-sdk>=7.0"]
+postgres = ["psycopg[binary]>=3.1"]
 dev = ["pytest>=8", "httpx>=0.27"]
 
 [build-system]

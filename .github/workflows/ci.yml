@@ -16,6 +16,26 @@ jobs:
       - name: Dependency vulnerability scan
         run: pip-audit --progress-spinner off || (echo "::warning::pip-audit reported vulnerabilities" && exit 1)
 
+  backend-postgres:
+    # Same suite with every API-fixture test on its own fresh PostgreSQL database (the docker-compose setup).
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: backend } }
+    services:
+      postgres:
+        image: postgres:16-alpine              # same major version as docker-compose.yml
+        env: { POSTGRES_PASSWORD: postgres }   # throwaway CI-only service, not a secret
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      QOPT_TEST_POSTGRES_URL: postgresql+psycopg://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -e ".[dev,postgres]"
+      - run: python -X faulthandler -m pytest -q -rs
+
   frontend:
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: frontend } }
@@ -61,7 +81,7 @@ jobs:
 
   docker:
     runs-on: ubuntu-latest
-    needs: [backend, frontend, e2e]
+    needs: [backend, backend-postgres, frontend, e2e]
     steps:
       - uses: actions/checkout@v4
       - run: docker build -t qopt:ci .

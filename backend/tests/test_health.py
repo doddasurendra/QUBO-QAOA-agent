@@ -2,7 +2,6 @@
 import importlib.util
 import os
 import shutil
-import sqlite3
 import time
 from collections import namedtuple
 from pathlib import Path
@@ -10,6 +9,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
+ON_POSTGRES = bool(os.environ.get("QOPT_TEST_POSTGRES_URL"))
 
 
 def load_probe():
@@ -19,15 +19,23 @@ def load_probe():
     return mod
 
 
+@pytest.fixture()
+def healthy_disk(monkeypatch):
+    """Tests expecting "ok" must not depend on the free space of the machine running them."""
+    U = namedtuple("U", "total used free")
+    monkeypatch.setattr(shutil, "disk_usage", lambda p: U(1000 * 2**30, 500 * 2**30, 500 * 2**30))
+
+
 # ------------------------------------------------------------------ /api/health/deep
-def test_deep_health_ok_and_reveals_no_paths(api):
+def test_deep_health_ok_and_reveals_no_paths(api, healthy_disk):
     r = api.get("/api/health/deep")
     body = r.json()
     assert r.status_code == 200 and body["status"] == "ok"
     assert body["checks"]["database"]["status"] == "ok"
     assert body["checks"]["migrations"]["status"] == "ok"
     assert body["checks"]["backups"]["status"] == "n/a"          # disabled in tests (interval 0)
-    assert body["checks"]["disk"]["status"] in ("ok", "degraded")
+    expected_disk = ("n/a",) if ON_POSTGRES else ("ok",)   # disk is checked for the SQLite file's volume
+    assert body["checks"]["disk"]["status"] in expected_disk
     assert r.headers["cache-control"] == "no-store"
     from qopt.services import health
     assert health.STARTED < time.monotonic()      # clock started at import (app startup), not on first request
@@ -35,14 +43,17 @@ def test_deep_health_ok_and_reveals_no_paths(api):
     assert "test.db" not in text and ":\\" not in text and "/tmp" not in text   # no filesystem paths leak
 
 
-def test_deep_health_fails_with_503_on_schema_mismatch(api, tmp_path):
-    db = tmp_path / "test.db"
-    con = sqlite3.connect(db); con.execute("update alembic_version set version_num='bogus'"); con.commit(); con.close()
+def test_deep_health_fails_with_503_on_schema_mismatch(api):
+    from sqlalchemy import text
+    from qopt.db.session import engine
+    with engine().begin() as c:                       # works on SQLite and PostgreSQL
+        c.execute(text("update alembic_version set version_num='bogus'"))
     r = api.get("/api/health/deep")
     assert r.status_code == 503 and r.json()["status"] == "fail"
     assert r.json()["checks"]["migrations"]["status"] == "fail"
 
 
+@pytest.mark.skipif(ON_POSTGRES, reason="disk space is only checked for SQLite (the database's own volume)")
 def test_deep_health_disk_thresholds(api, monkeypatch):
     U = namedtuple("U", "total used free")
     monkeypatch.setattr(shutil, "disk_usage", lambda p: U(1000 * 2**20, 900 * 2**20, 100 * 2**20 - 1))
@@ -97,7 +108,7 @@ def test_probe_retries_before_declaring_down_and_recovers():
     assert r["verdict"] == "degraded" and r["attempts"] == 1
 
 
-def test_probe_against_live_test_server(api):
+def test_probe_against_live_test_server(api, healthy_disk):
     """Real HTTP round trip through the probe's classification of a real deep-health body."""
     p = load_probe()
     r = api.get("/api/health/deep")

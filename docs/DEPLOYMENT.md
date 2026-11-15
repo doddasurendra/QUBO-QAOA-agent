@@ -24,6 +24,10 @@ Production mode refuses to start without a strong `QOPT_JWT_SECRET`.
   migration, path and `.env.example` requirements in CI.
 - **Verified:** the `Dockerfile` builds and runs. It is the image deployed on Fly.io (built by Fly's remote builder,
   149 MB), healthy, serving HTTPS, migrations applied to the volume, app process non-root.
+- **Verified in CI:** the backend suite on **PostgreSQL 16** (job `backend-postgres`: every API test gets its own
+  freshly created and migrated database; `tests/test_database_backend.py` asserts the dialect really is PostgreSQL).
+  Run it locally against any server with `QOPT_TEST_POSTGRES_URL=postgresql+psycopg://user:pw@host:5432/postgres`
+  (the user needs `CREATE DATABASE`) after `pip install -e ".[dev,postgres]"`.
 - **Not verified:** `docker compose up` (with PostgreSQL) on a local Docker host. Docker is not installed on the
   development machine. On a Docker host, run the commands above; then check `docker compose ps` shows `healthy`.
 
@@ -100,7 +104,13 @@ Three layers, no extra Fly product needed:
 |---|---|---|---|
 | Volume snapshots | Fly's daily snapshot of the whole volume | Fly | 30 days (`snapshot_retention = 30`; first 10 GB free) |
 | In-app backups | consistent SQLite copy (online backup API), `PRAGMA integrity_check` before it is kept | `/app/data/backups` on the volume | daily, newest 14 (`QOPT_BACKUP_INTERVAL_HOURS`, `QOPT_BACKUP_KEEP`) |
-| Off-site copy | `scripts\download-backup.ps1` creates a fresh backup and downloads it, then re-checks integrity | `backups-offsite\` on your PC (git-ignored) | your choice; run it e.g. weekly |
+| Off-site copy | `scripts\download-backup.ps1` creates a fresh backup and downloads it, then re-checks integrity | `backups-offsite\` on your PC (git-ignored) | your choice; weekly via the scheduled task below |
+
+**Weekly off-site copy, automatically:** `powershell -ExecutionPolicy Bypass -File scripts\register-backup-task.ps1`
+registers a Windows scheduled task (Sundays 10:00 by default; `-Day`, `-At` to change; `-RunNow` for an immediate
+test run; `-Unregister` to remove it). It runs as you, only while you are logged on (flyctl uses your login), catches
+up if the PC was off, and appends to `backups-offsite\backup-task.log` (a failure is logged as `FAILED: <reason>`
+and the task's last result is non-zero; check with `Get-ScheduledTaskInfo -TaskName 'qopt off-site backup'`).
 
 Administrators see the backups and a **Back up now** button under *Administration → Database backups*. There is
 deliberately no web download (backups contain password hashes); off-site copies go through your `flyctl` login.
