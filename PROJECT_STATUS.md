@@ -1,6 +1,6 @@
 # PROJECT_STATUS
 
-_Last updated: 2026-11-13 · version 0.1.0_
+_Last updated: 2026-11-15 · version 0.1.0_
 
 ## Summary
 
@@ -28,7 +28,8 @@ so no real-QPU job and no live Claude API call has been made.
 | 12 | Regression after a11y fixes (93 functional tests, per-browser runs) + one-command production launcher, app running locally | done | `011dd3d` |
 | 13 | Setup token for first admin; public cloud deployment on Fly.io (https://qopt-quantum-c4da.fly.dev) | done | `efec4d3`, `81b5f7c` |
 | 14 | Automated backups on Fly (owner chose SQLite + backups over Managed Postgres at ≥ $38/month): 30-day volume snapshots, daily integrity-checked in-app backups, off-site download script, tested restore | done | `52e56f6` |
-| 15 | Deep health check, GitHub Actions uptime monitor (alert + recovery verified live), external-monitor and custom-domain guides (owner has no domain yet); first CI runs fixed (frontend dependency vulnerabilities, Linux worker-thread crash) | done | `1496999` + see `git log` |
+| 15 | Deep health check, GitHub Actions uptime monitor (alert + recovery verified live), external-monitor and custom-domain guides (owner has no domain yet); first CI runs fixed (frontend dependency vulnerabilities, Qiskit ≥ 2.5 event-loop-thread crash, root-caused) | done | `1496999`, `ccfc10d` |
+| 16 | Production hardening: whole backend suite on PostgreSQL 16 in CI (per-test databases, dialect guard), host-independent health tests, weekly off-site backup scheduled-task script (not registered: owner's choice) | done | `0924a63`, `2655e70` |
 
 ## Completed (implemented + tested)
 
@@ -54,9 +55,11 @@ so no real-QPU job and no live Claude API call has been made.
 
 ## Tests
 
-- **Passed:** backend `pytest` **178 / 178** (core 34, solvers 13, QAOA 23, industries/hybrid 36, industry
-  reference solvers 22, agents 11, API 18, deployment 6, backups 7, health/monitor 7, native-thread regression 1).
-  **GitHub CI fully green** (run 43572749019: backend, frontend, e2e chromium/firefox/webkit, docker). After the dependency upgrades
+- **Passed:** backend `pytest` **180 tests** (core 34, solvers 13, QAOA 23, industries/hybrid 36, industry
+  reference solvers 22, agents 11, API 18, deployment 6, backups 7, health/monitor 7, native-thread regression 1,
+  database-dialect guard 2), all passing on SQLite; on **PostgreSQL 16** 178 pass and 2 are skipped by design (SQLite
+  disk check; SPA test without a frontend build). **GitHub CI fully green** (run 43678234312: backend, backend-postgres,
+  frontend, e2e chromium/firefox/webkit, docker). After the dependency upgrades
   (Playwright 1.65), the full chromium E2E + accessibility suite passed locally (60 tests; one browser crash at
   0.1 GB free memory, passed on re-run); firefox/webkit run in the CI matrix. **Browser E2E 94 / 94** (Playwright: Chromium,
   Firefox, WebKit; two consecutive clean full runs). Frontend `tsc` + `vite build` clean. Two live
@@ -87,9 +90,10 @@ so no real-QPU job and no live Claude API call has been made.
   code is untested against live services.
 - **No live Claude API call.** Agent behaviour with the real model is untested; orchestration is tested with a
   scripted client.
-- **`docker build` / `docker compose up` and PostgreSQL not run.** Docker, WSL2 and PostgreSQL are not installed on
-  this machine, and installing Docker Desktop needs WSL2/Hyper-V enabled with admin rights and a reboot. The
-  runtime the image uses (installed package, production mode, same paths) is verified; CI builds the image.
+- **`docker compose up` not run.** Docker and WSL2 are not installed on this machine (Docker Desktop needs
+  WSL2/Hyper-V, admin rights and a reboot). Its parts are verified separately: the image is built in CI and runs on
+  Fly; the backend suite runs against PostgreSQL 16 in CI. PostgreSQL in production (and with jobs on worker
+  threads under real concurrency) is not exercised; the live site uses SQLite.
 - **Browser coverage:** E2E runs Playwright's builds of Chromium, Firefox and WebKit. WebKit approximates Safari but is
   not the shipping Safari on macOS/iOS, and none of the runs was on a real phone (mobile is an emulated viewport).
   Tests check behaviour, not visual appearance (no screenshot comparison). The installed Microsoft Edge crashed under
@@ -192,9 +196,9 @@ Machine Platform enabled by the owner, admin rights, a reboot and ≈ 2–4 GB f
 
 0. Owner: add a card at https://fly.io/trial (machine stops every 5 min on the trial), create the admin account, set up
    the external monitor, and add a custom domain when one is available.
-1. Production hardening on Fly: schedule `scripts\download-backup.ps1`
-   (e.g. Windows Task Scheduler, weekly); PostgreSQL (Fly Managed Postgres, ≥ $38/month) if high availability or
-   multiple app machines are needed, plus a CI job running the suite against PostgreSQL.
+1. Owner: register the weekly off-site backup (`scripts\register-backup-task.ps1 -RunNow`). PostgreSQL in production
+   (Fly Managed Postgres, ≥ $38/month) only if high availability or multiple app machines are needed; the code and
+   test suite are ready for it.
 2. With credentials: a real IBM job end-to-end through the approval flow; Braket/D-Wave integration tests.
 3. With an API key: agent evaluations on the three natural-language example prompts; tune prompts and effort.
 4. Manual screen-reader + keyboard-only review; audit dark mode; live-region announcements for job progress; data-table
