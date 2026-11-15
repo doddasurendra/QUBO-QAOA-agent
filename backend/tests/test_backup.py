@@ -1,4 +1,5 @@
 """SQLite backup service: consistency, integrity, pruning, restore round-trip, scheduler, admin API."""
+import os
 import sqlite3
 import time
 
@@ -103,10 +104,14 @@ def test_scheduler_runs_backups(db):
 def test_admin_backup_api_and_rbac(admin_client):
     api = admin_client
     r = api.post("/api/admin/backups")
-    assert r.status_code == 200 and r.json()["integrity"] == "ok"
-    listing = api.get("/api/admin/backups").json()
-    assert listing["enabled"] and listing["backups"][0]["name"] == r.json()["name"]
-    assert any(e["action"] == "backup_create" for e in api.get("/api/admin/audit").json())
+    if os.environ.get("QOPT_TEST_POSTGRES_URL"):
+        # PostgreSQL relies on the database provider's backups: the API must refuse clearly, not pretend.
+        assert r.status_code == 409 and "SQLite" in r.json()["detail"], r.text
+    else:
+        assert r.status_code == 200 and r.json()["integrity"] == "ok"
+        listing = api.get("/api/admin/backups").json()
+        assert listing["enabled"] and listing["backups"][0]["name"] == r.json()["name"]
+        assert any(e["action"] == "backup_create" for e in api.get("/api/admin/audit").json())
     api.post("/api/users", json={"email": "r@x.co", "password": "password123", "role": "researcher"})
     tok = api.post("/api/auth/login", json={"email": "r@x.co", "password": "password123"}).json()["access_token"]
     h = {"Authorization": f"Bearer {tok}"}
